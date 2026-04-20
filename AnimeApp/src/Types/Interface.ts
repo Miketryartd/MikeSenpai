@@ -16,3 +16,12 @@ export interface AnimeInfo {
     Status: string,
     epCount: number,
 }
+
+
+
+export interface AnimeSearch {
+    Name: string,
+    Id: number,
+    Image: string,
+    finder: string
+}
