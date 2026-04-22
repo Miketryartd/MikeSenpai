@@ -25,3 +25,19 @@ export interface AnimeSearch {
     Image: string,
     finder: string
 }
+
+
+export type AniData = {
+    _id: number;
+    Name: string;
+    ImagePath: string;
+    MALScore: number | string;
+    RatingsNum: number;
+    DescripTion: string;
+    finder: string;
+  };
+  
+  export interface TopRatedAnime {
+    currentPage: number;
+    AniData: AniData[];
+  }
