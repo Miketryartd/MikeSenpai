@@ -41,3 +41,8 @@ export type AniData = {
     currentPage: number;
     AniData: AniData[];
   }
+
+  export type  WatchOverlayProps = {
+    children: React.ReactNode;
+    onClick?: () => void;
+  }
