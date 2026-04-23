@@ -1,5 +1,6 @@
 
-import SearchAnime from "../Components/SearchAnime";
+import Hero from "../Components/Hero";
+import Nav from "../Components/Nav";
 import TopRatedShowcase from "../Components/TopRatedShowcase";
 import { useAnimeAll } from "../Hooks/useAnimeAll";
 
@@ -11,15 +12,20 @@ function Main (){
 
     return (
         <>
-        <div className="bg-[#0d0d14] text-purple-500 w-full h-screen">
-        <SearchAnime/>
+        <div className="bg-[#0d0d14] text-purple-500 w-full min-h-screen">
+        
+        <Nav/>
 
-          <div>
+        <div>
+          <Hero/>
+        </div>
+          <div className="pt-10">
             <TopRatedShowcase/>
           </div>
 
         <p>main</p>
          <h1>Total anime: {anime}</h1>
+         
     </div>
         </>
     )
