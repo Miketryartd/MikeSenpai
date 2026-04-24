@@ -1,11 +1,16 @@
 import { useParams } from "react-router-dom";
+
 import { useAnimeDetails } from "../Hooks/useAnimeDetail";
+import { useState } from "react";
 import NavHeader from "../Components/Nav"
+import EpisodeList from "../Components/EpisodeList";
+import Stream from "../Components/Stream";
 
 
 function Detail() {
     const { id } = useParams();
     const { loading, result, error } = useAnimeDetails(id);
+    const [currentVideo, setCurrentVideo] = useState<string | null>(null);
   
     if (loading) return <p>Loading...</p>;
     if (error) return <p>{error}</p>;
@@ -94,6 +99,19 @@ function Detail() {
             <p><span className="text-gray-400">Score:</span> {anime?.MALScore}</p>
           </div>
         </div>
+
+     <div>
+
+        <div>
+            <Stream currentVideo={currentVideo}/>
+        </div>
+
+        <div>
+     <EpisodeList onSelectEp={setCurrentVideo}/>
+     </div>
+
+
+     </div>
       </div>
     );
   }
