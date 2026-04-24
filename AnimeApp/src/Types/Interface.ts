@@ -76,7 +76,30 @@ export type AniData = {
 
   }
 
+
   export interface AnimeDetail {
     local: AnimeDetailProps;
   }
   
+
+
+  export type Episode = {
+    link: string; 
+  };
+  
+  export type AnimeStreamingProps = {
+    _id?: number | string;
+    name?: string;
+    link?: string;
+    whatType?: string;
+    type?: string;
+    ep?: Episode[]; 
+    finder?: string;
+  };
+  
+  export type AnimeStream = {
+    local: AnimeStreamingProps;
+  };
+  export type StreamProps = {
+    currentVideo?: string | null;
+  }
