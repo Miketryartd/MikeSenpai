@@ -42,7 +42,7 @@ function Detail() {
   <div className="absolute inset-0 flex items-center justify-center z-10">
     <a
       href="#watch-section"
-      className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold shadow-lg hover:scale-105 transition"
+      className="cursor-pointer flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold shadow-lg hover:scale-105 transition"
     >
       <span className="text-lg"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="icon icon-tabler icons-tabler-filled icon-tabler-player-play"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg></span>
       Watch Now
@@ -106,8 +106,8 @@ function Detail() {
             <Stream currentVideo={currentVideo}/>
         </div>
 
-        <div>
-     <EpisodeList onSelectEp={setCurrentVideo}/>
+        <div id="#watch-section">
+     <EpisodeList  onSelectEp={setCurrentVideo}/>
      </div>
 
 

@@ -1,4 +1,5 @@
 
+import AnimeGenre from "../Components/AnimeGenre";
 import Hero from "../Components/Hero";
 import Nav from "../Components/Nav";
 import TopRatedShowcase from "../Components/TopRatedShowcase";
@@ -23,6 +24,10 @@ function Main (){
             <TopRatedShowcase/>
           </div>
 
+
+          <div className="pt-10">
+        <AnimeGenre/>  
+      </div>
         <p>main</p>
          <h1>Total anime: {anime}</h1>
          

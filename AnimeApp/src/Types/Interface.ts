@@ -103,3 +103,20 @@ export type AniData = {
   export type StreamProps = {
     currentVideo?: string | null;
   }
+
+
+  export type AnimeGenreProps = {
+ 
+    _id: number | string;
+    Name: string;
+    ImagePath: string;
+    MALScore: string;
+    RatingsNum: string;
+    DescripTion: string;
+    finder: string;
+  }
+
+  export type AnimeGenre = {
+    currentPage?: number | string;
+    wholePage?: AnimeGenreProps[];
+  }

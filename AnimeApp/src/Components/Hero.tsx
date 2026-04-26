@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTopRated } from "../Hooks/useTopRated";
 import type { AniData } from "../Types/Interface";
+import { Link } from "react-router";
 
 function Hero() {
   const { results, loading } = useTopRated();
@@ -41,9 +42,11 @@ function Hero() {
             {featured.DescripTion}
           </p>
 
-          <button className="cursor-pointer mt-6 bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded">
+        <div className="mt-10">
+        <Link to={`/Detail/${featured._id}/${featured.finder}`} className="cursor-pointer mt-6 bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded">
              Watch Now
-          </button>
+          </Link>
+        </div>
         </div>
 
       
