@@ -19,9 +19,9 @@ export interface AnimeInfo {
 
 
 
-export interface AnimeSearch {
+export type AnimeSearch = {
     Name?: string,
-    Id?: number,
+    Id?: number | string ,
     Image?: string,
     finder?: string
 }

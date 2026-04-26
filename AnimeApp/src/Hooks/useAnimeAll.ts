@@ -3,7 +3,7 @@ import { getAllAnime } from "../Services/getAllAnime";
 
 export function useAnimeAll() {
   const [anime, setAnime] = useState<number>(Number);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
