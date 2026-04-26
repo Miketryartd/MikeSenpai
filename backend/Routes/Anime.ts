@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.get('/api/animeAll', getAllAnime);
 router.get('/api/searchAnime/:query', SearchAnime);
-router.get('/api/topRated', TopRatedAnime );
+router.get('/api/topRated/:page', TopRatedAnime );
 router.get("/api/getAnimeDetail/:id", getDetails);
 router.get('/api/getStream/:id', getStream);
 export default router;
