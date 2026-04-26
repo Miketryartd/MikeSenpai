@@ -2,8 +2,8 @@ import dotenv from "dotenv";
 dotenv.config({path: "./Config/.env"});
 import express from "express";
 import cors from "cors";
-import userRoutes from "./Routes/UserRoute";
-import animeRoutes from "./Routes/Anime";
+import userRoutes from "./Routes/UserRoute.js";
+import animeRoutes from "./Routes/Anime.js";
 import mongoose from "mongoose";
 
 const app = express();

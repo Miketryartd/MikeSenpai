@@ -4,10 +4,12 @@
   "description": "",
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+  "start": "node dist/server.js",
+  "dev": "tsx server.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
