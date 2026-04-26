@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import UserSchemaZOD from "../ZodMod/UserZod";
-import User from "../Models/User";
+import UserSchemaZOD from "../ZodMod/UserZod.js";
+import User from "../Models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 

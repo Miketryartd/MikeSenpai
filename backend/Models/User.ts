@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
-import { required } from "zod/mini";
+
 
 const userSchema = new Schema({
     email: {type: String, required: true},

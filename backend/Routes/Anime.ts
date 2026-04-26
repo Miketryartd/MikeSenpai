@@ -1,10 +1,10 @@
 import express from "express";
-import { getAllAnime } from "../Controllers/AllAnimeController";
-import { SearchAnime } from "../Controllers/SearchAnimeController";
-import {TopRatedAnime} from "../Controllers/TopRatedAnimeController";
-import { getDetails } from "../Controllers/DetailAnimeController";
-import { getStream } from "../Controllers/StreamAnimeController";
-import { findByGenre } from "../Controllers/FindByGenreController";
+import { getAllAnime } from "../Controllers/AllAnimeController.js";
+import { SearchAnime } from "../Controllers/SearchAnimeController.js";
+import {TopRatedAnime} from "../Controllers/TopRatedAnimeController.js";
+import { getDetails } from "../Controllers/DetailAnimeController.js";
+import { getStream } from "../Controllers/StreamAnimeController.js";
+import { findByGenre } from "../Controllers/FindByGenreController.js";
 
 const router = express.Router();
 

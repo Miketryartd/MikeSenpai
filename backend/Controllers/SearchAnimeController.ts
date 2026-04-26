@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import SearchVal from "../ZodMod/SearchInputVal";
+import SearchVal from "../ZodMod/SearchInputVal.js";
 
 
 export const SearchAnime = async (req: Request, res: Response) => {
