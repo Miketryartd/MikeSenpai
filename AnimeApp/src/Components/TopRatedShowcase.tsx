@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTopRated } from "../Hooks/useTopRated";
 import topratedLogo from "../assets/Images/junko.png";
 import WatchOverlay from "./WatchOverlay";
@@ -8,6 +8,9 @@ function TopRatedShowcase() {
   const { results, loading, error, totalPages } = useTopRated(page);
 
  
+  const [onCooldown, setOnCooldown] = useState(false);
+const cooldownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const VISIBLE = 3;
 
@@ -36,10 +39,19 @@ const handleNext = () => {
     setCurrentIndex((prev) => prev + 1);
   }
 };
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    setCurrentIndex(0); 
-  };
+
+
+ const handlePageChange = (newPage: number) => {
+  if (onCooldown) return;          
+  if (newPage < 1 || newPage > totalPages) return;  
+
+  setPage(newPage);
+  setCurrentIndex(0);
+  setOnCooldown(true);             
+  cooldownTimer.current = setTimeout(() => {
+    setOnCooldown(false);         
+  }, 1500);                        
+};
 
   const visibleResults = results.slice(currentIndex, currentIndex + VISIBLE);
   const backdropImage = results[currentIndex]?.ImagePath;

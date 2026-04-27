@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getStreamLinks } from "../Services/streamLink";
 import type { AnimeStream } from "../Types/Interface";
 
-export const useAnimeStream = (id: number | string) => {
+export const useAnimeStream = (id: number | string | undefined) => {
   const [result, setResult] = useState<AnimeStream | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

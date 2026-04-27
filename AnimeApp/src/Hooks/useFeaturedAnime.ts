@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { AnimeDetailProps } from "../Types/Interface";
 import { getInfo } from "../Services/getInfo";
 
-const FETCH_COUNT = 50;   
+const FETCH_COUNT = 35;   
 const TOTAL_IN_DB = 150;  
 
 

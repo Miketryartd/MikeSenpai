@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { DynamicUrl } from "../Utils/DynamicUrl";
-
+import type { AniData } from "../Types/Interface";
 const TOTAL_PAGES = 354; 
 
 export function useTopRated(page: number = 1) {
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<AniData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

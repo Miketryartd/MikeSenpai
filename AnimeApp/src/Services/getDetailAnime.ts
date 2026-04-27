@@ -3,7 +3,7 @@ import { DynamicUrl } from "../Utils/DynamicUrl";
 
 
 
-export const getDetailAnime = async (id: number | string) => {
+export const getDetailAnime = async (id: number | string | undefined) => {
 
     try{
         

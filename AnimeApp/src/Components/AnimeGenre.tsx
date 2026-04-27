@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useGenre } from "../Hooks/useGenre";
 import { useGenrePreviews } from "../Hooks/useGenrePrev";
 import { GENRES } from "../Config/genres";
-import AnimeWrapper from "./AnimeCard";
+import AnimeCard from "./AnimeCard";
 
 function AnimeGenre() {
   const [activeGenre, setActiveGenre] = useState<string | null>("Action");
@@ -25,12 +25,12 @@ function AnimeGenre() {
       <h1 className="text-xl font-semibold text-white mb-4">Browse by Genre</h1>
 
     
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-6">
         {GENRES.map((genre) => (
           <button
             key={genre}
             onClick={() => handleGenreClick(genre)}
-            className={`relative w-50 h-20 rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-300
+            className={`relative w-full h-20 rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-300
               ${activeGenre === genre
                 ? "border-purple-500 scale-105"
                 : "border-transparent hover:border-purple-800 hover:scale-105"
@@ -69,11 +69,11 @@ function AnimeGenre() {
             <p className="text-gray-500 text-sm text-center">No anime found for {activeGenre}</p>
           )}
 
-          {!loading && results.length > 0 && (
+          {!loading && results?.length > 0 && (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 2xl:grid-cols-7 gap-2 mb-6">
                 {results.map((a: any) => (
-                  <AnimeWrapper
+                  <AnimeCard
                     key={a._id}
                     Id={a._id}
                     finder={a.finder}

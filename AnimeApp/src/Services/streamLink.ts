@@ -2,7 +2,7 @@ import { DynamicUrl } from "../Utils/DynamicUrl";
 
 
 
-export const getStreamLinks = async (id: number | string) => {
+export const getStreamLinks = async (id: number | string | undefined) => {
 
     try{
 

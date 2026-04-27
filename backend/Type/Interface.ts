@@ -20,11 +20,10 @@ export interface AnimeInfo {
 
 
 export type AnimeSearch = {
-    Name?: string;
-    Id?: number | string;
-    Image?: string;
-    
-    finder?: string;
+    Name?: string,
+    Id?: number | string ,
+    Image?: string,
+    finder?: string
 }
 
 
@@ -39,19 +38,12 @@ export type AniData = {
     finder: string;
   };
   
-  export interface TopRatedAnime {
+  export interface TopRatedAnimeP {
     currentPage: number;
     AniData: AniData[];
   }
 
-  export type  WatchOverlayProps = {
-    children: React.ReactNode;
-    onClick?: () => void;
-    id?: number | string | undefined;
-    finder?: string | undefined;
-    name?: string | undefined;
-  }
-
+ 
 
   export type AnimeDetailProps = {
     _id?: number | string;

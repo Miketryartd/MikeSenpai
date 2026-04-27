@@ -97,6 +97,8 @@ function Detail() {
             <p><span className="text-gray-400">Premiered:</span> {anime?.Premiered}</p>
             <p><span className="text-gray-400">Status:</span> {anime?.Status}</p>
             <p><span className="text-gray-400">Episodes:</span> {anime?.epCount}</p>
+              <p><span className="text-gray-400">Episodes:</span> {anime?.Duration  }</p>
+                <p><span className="text-gray-400">Genre(s):</span> {anime?.Genres?.slice(0, 2).join(',')}</p>
             <p><span className="text-gray-400">Score:</span> {anime?.MALScore}</p>
           </div>
         </div>

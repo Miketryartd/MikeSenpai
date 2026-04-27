@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getGenre } from "../Services/getGenre";
 import type { AnimeGenre } from "../Types/Interface";
 export const useGenre = (genre: string | null, page: number = 1) => {
-  const [results, setResults] = useState<AnimeGenre[] | null>([]);
+  const [results, setResults] = useState<AnimeGenre[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

@@ -1,7 +1,7 @@
 import { DynamicUrl } from "../Utils/DynamicUrl";
 
 
-export const getGenre = async (genre: string | undefined, page: number | string) => {
+export const getGenre = async (genre: string | number, page: number | string) => {
 
     try{
 

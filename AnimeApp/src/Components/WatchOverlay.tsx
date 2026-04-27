@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import type { WatchOverlayProps } from "../Types/Interface";
 
-function WatchOverlay({ children, id, finder }: WatchOverlayProps) {
+function WatchOverlay({ children, id, finder, name }: WatchOverlayProps) {
   const navigate = useNavigate();
  
   const handleClick = () => {
     
    
-    navigate(`/Detail/${id}/${finder}`);
+    navigate(`/Detail/${id}/${finder || name}`);
   };
 
   return (

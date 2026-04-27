@@ -3,7 +3,7 @@ import { getDetailAnime } from "../Services/getDetailAnime"
 import type { AnimeDetail } from "../Types/Interface"
 
 
-export const useAnimeDetails =  (id: number | string) => {
+export const useAnimeDetails =  (id: number | string | undefined) => {
 
     const [result, setResult] = useState<AnimeDetail | null>(null);
       const [loading, setLoading] = useState<boolean>(true);
