@@ -5,6 +5,7 @@ import {TopRatedAnime} from "../Controllers/TopRatedAnimeController.js";
 import { getDetails } from "../Controllers/DetailAnimeController.js";
 import { getStream } from "../Controllers/StreamAnimeController.js";
 import { findByGenre } from "../Controllers/FindByGenreController.js";
+import {getAnimeInfo} from "../Controllers/AnimeInfoControllr.js";
 
 const router = express.Router();
 
@@ -15,4 +16,5 @@ router.get('/api/topRated/:page', TopRatedAnime );
 router.get("/api/getAnimeDetail/:id", getDetails);
 router.get('/api/getStream/:id', getStream);
 router.get('/api/findByGenre/:genre/', findByGenre);
+router.get('/api/getInfo/:id', getAnimeInfo);
 export default router;
