@@ -1,3 +1,4 @@
+import { DynamicUrl } from "../Utils/DynamicUrl";
 
 export async function searchAnime(query: string) {
     const cleanedQuery = query.trim();
@@ -6,7 +7,7 @@ export async function searchAnime(query: string) {
       throw new Error("Empty query");
     }
   
-    const url = `http://localhost:3000/mikesenpai/api/searchAnime/${encodeURIComponent(cleanedQuery)}`;
+    const url = `${DynamicUrl()}/mikesenpai/api/searchAnime/${encodeURIComponent(cleanedQuery)}`;
   
     const res = await fetch(url);
   

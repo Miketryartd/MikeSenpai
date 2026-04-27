@@ -1,3 +1,4 @@
+import { DynamicUrl } from "../Utils/DynamicUrl";
 
 
 
@@ -5,7 +6,7 @@ export const authRegister = async (email: string, password: string) => {
 
     try{
 
-        const url = `http://localhost:3000/mikenichan/api/auth/register`;
+        const url = `${DynamicUrl()}/mikenichan/api/auth/register`;
         const res = await fetch(url, {
             method: "POST",
             headers: {

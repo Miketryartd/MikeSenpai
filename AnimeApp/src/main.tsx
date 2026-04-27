@@ -7,6 +7,8 @@ import Home from './Pages/Home.tsx';
 import Main from './Pages/Main.tsx';
 import Detail from './Pages/Detail.tsx'
 import Register from './Pages/Register.tsx';
+import BingeWorth from './Components/Featured.tsx'
+
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -17,6 +19,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path='/Main' element={<Main/>}></Route>
         <Route path='/Mike-Senpai/:anime'></Route>
         <Route path='/Detail/:id/:finder' element={<Detail/>}></Route>
+       
 
         <Route path='/Register' element={<Register/>}></Route>
 

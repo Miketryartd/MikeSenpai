@@ -1,3 +1,4 @@
+import { DynamicUrl } from "../Utils/DynamicUrl";
 
 
 
@@ -5,7 +6,7 @@ export const getStreamLinks = async (id: number | string) => {
 
     try{
 
-        const url = `http://localhost:3000/mikesenpai/api/getStream/${id}`;
+        const url = `${DynamicUrl()}/mikesenpai/api/getStream/${id}`;
         const res = await fetch(url, {
             method: "GET",
             headers: {

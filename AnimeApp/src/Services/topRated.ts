@@ -1,10 +1,11 @@
+import { DynamicUrl } from "../Utils/DynamicUrl";
 
 
 export async function getTopRated (){
 
     try{
 
-        const url = `http://localhost:3000/mikesenpai/api/topRated`;
+        const url = `${DynamicUrl()}/mikesenpai/api/topRated`;
         const res = await fetch(url, {
             method: "GET",
             headers: {

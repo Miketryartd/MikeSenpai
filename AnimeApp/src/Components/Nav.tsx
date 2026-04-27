@@ -72,8 +72,8 @@ function Nav() {
               </svg>
             </a>
 
-            <Link to='/Signup' className="cursor-pointer border border-purple-700 text-purple-400 hover:bg-purple-700 hover:text-white px-5 py-2 rounded-lg text-sm font-semibold uppercase tracking-widest transition-colors">
-              Sign Up
+            <Link to='/Register' className="cursor-pointer border border-purple-700 text-purple-400 hover:bg-purple-700 hover:text-white px-5 py-2 rounded-lg text-sm font-semibold uppercase tracking-widest transition-colors">
+            Sign up
             </Link>
           </div>
 

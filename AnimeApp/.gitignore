@@ -23,8 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
-/src/Config.env
-/src/Configenv
+/src/Config/.env
+/src/Config/env
+
+.env
 
 **.env
 *.env

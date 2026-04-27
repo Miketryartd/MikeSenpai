@@ -7,6 +7,7 @@ import EpisodeList from "../Components/EpisodeList";
 import Stream from "../Components/Stream";
 
 
+
 function Detail() {
     const { id } = useParams();
     const { loading, result, error } = useAnimeDetails(id);
@@ -106,9 +107,11 @@ function Detail() {
             <Stream currentVideo={currentVideo}/>
         </div>
 
-        <div id="#watch-section">
+        <div id="#watch-section" className="mt-10">
      <EpisodeList  onSelectEp={setCurrentVideo}/>
      </div>
+
+   
 
 
      </div>

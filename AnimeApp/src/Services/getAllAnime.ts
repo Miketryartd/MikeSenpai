@@ -1,8 +1,9 @@
+import { DynamicUrl } from "../Utils/DynamicUrl";
 
 export async function getAllAnime(){
     
     try{
-     const url = `http://localhost:3000/mikesenpai/api/animeAll`;
+     const url = `${DynamicUrl()}/mikesenpai/api/animeAll`;
      const res = await fetch(url, {
        method: "GET",
        headers: {

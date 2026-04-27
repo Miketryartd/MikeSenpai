@@ -1,3 +1,4 @@
+import { DynamicUrl } from "../Utils/DynamicUrl";
 
 
 
@@ -6,7 +7,7 @@ export const getDetailAnime = async (id: number | string) => {
 
     try{
         
-        const url = `http://localhost:3000/mikesenpai/api/getAnimeDetail/${id}`;
+        const url = `${DynamicUrl()}/mikesenpai/api/getAnimeDetail/${id}`;
         const res = await fetch(url, {
             method: 'GET',
             headers: {

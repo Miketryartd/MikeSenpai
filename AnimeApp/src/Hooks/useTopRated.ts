@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { DynamicUrl } from "../Utils/DynamicUrl";
 
 const TOTAL_PAGES = 354; 
 
@@ -15,7 +16,7 @@ export function useTopRated(page: number = 1) {
       setError(null);
 
       try {
-        const res = await fetch(`http://localhost:3000/mikesenpai/api/topRated/${page}`, {
+        const res = await fetch(`${DynamicUrl()}/mikesenpai/api/topRated/${page}`, {
           signal: controller.signal,
         });
 
