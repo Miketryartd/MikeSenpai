@@ -77,6 +77,13 @@ export type AniData = {
   }
 
 
+  export type BingeWorth = {
+    bingeList: AnimeDetailProps[];
+    isLoading: boolean;
+    error: string | null;
+  }
+
+
   export interface AnimeDetail {
     local: AnimeDetailProps;
   }
