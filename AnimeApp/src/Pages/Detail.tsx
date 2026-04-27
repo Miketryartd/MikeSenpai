@@ -5,6 +5,7 @@ import { useState } from "react";
 import NavHeader from "../Components/Nav"
 import EpisodeList from "../Components/EpisodeList";
 import Stream from "../Components/Stream";
+import CommentSection from "../Components/CommentSection";
 
 
 
@@ -111,6 +112,10 @@ function Detail() {
 
         <div id="#watch-section" className="mt-10">
      <EpisodeList  onSelectEp={setCurrentVideo}/>
+     </div>
+
+     <div className="mt-10 p-10">
+      <CommentSection/>
      </div>
 
    

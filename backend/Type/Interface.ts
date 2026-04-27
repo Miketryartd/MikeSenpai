@@ -121,3 +121,8 @@ export type AniData = {
     currentPage?: number | string;
     wholePage?: AnimeGenreProps[];
   }
+
+  export interface TokenPayload {
+  id: string;
+  email: string;
+}

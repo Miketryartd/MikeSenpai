@@ -5,13 +5,14 @@ import cors from "cors";
 import userRoutes from "./Routes/UserRoute.js";
 import animeRoutes from "./Routes/Anime.js";
 import mongoose from "mongoose";
-
+import commentRoutes from "./Routes/CommentRoute.js";
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 app.use('/mikesenpai', animeRoutes);
 app.use('/mikenichan', userRoutes);
+app.use('/mikesempai', commentRoutes);
 
 const PORT = process.env.HOST || 3000;
 
