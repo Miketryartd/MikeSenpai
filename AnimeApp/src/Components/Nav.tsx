@@ -26,7 +26,7 @@ const getUserFromToken = (jwt: string) => {
 
 const user = token ? getUserFromToken(token) : null;
 const email = user?.email;
-const real_name = email.slice(0, 1).toUpperCase();
+const real_name = email?.slice(0, 1).toUpperCase() ?? "?";
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
