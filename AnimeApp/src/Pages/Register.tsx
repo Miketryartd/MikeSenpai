@@ -9,13 +9,16 @@
     const nav = useNavigate();
     const { loading, error, register } = useRegister();
 
-    const handleRegister =  (e: React.FormEvent) => {
-      e.preventDefault();
-      
-        register(email, password);
-        nav('/Main');
-        return;
-    };
+  const handleRegister = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  const data = await register(email, password);  
+
+  if (data) {
+    nav('/Main');  
+    return;
+  }
+};
 
     return (
       <div className="min-h-screen w-full flex bg-[#0d0d14]">

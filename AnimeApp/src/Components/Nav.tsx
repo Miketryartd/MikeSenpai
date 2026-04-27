@@ -10,6 +10,23 @@ function Nav() {
   const { results, search, loading, error } = useSearchAnime();
   const navRef = useRef<HTMLDivElement>(null); 
 
+ const token = sessionStorage.getItem("token");
+const isLoggedIn = !!token;
+
+const getUserFromToken = (jwt: string) => {
+  try {
+    
+    const payload = jwt.split(".")[1];
+    
+    return JSON.parse(atob(payload));
+  } catch {
+    return null;
+  }
+};
+
+const user = token ? getUserFromToken(token) : null;
+const email = user?.email;
+const real_name = email.slice(0, 1).toUpperCase();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -72,9 +89,13 @@ function Nav() {
               </svg>
             </a>
 
-            <Link to='/Register' className="cursor-pointer border border-purple-700 text-purple-400 hover:bg-purple-700 hover:text-white px-5 py-2 rounded-lg text-sm font-semibold uppercase tracking-widest transition-colors">
+          {isLoggedIn ? (
+            <p className="border rounded-full  bg-gray-600 w-10 h-10 p-2 text-center">{real_name}</p>
+          ): (
+             <Link to='/Register' className="cursor-pointer border border-purple-700 text-purple-400 hover:bg-purple-700 hover:text-white px-5 py-2 rounded-lg text-sm font-semibold uppercase tracking-widest transition-colors">
             Sign up
             </Link>
+          )}
           </div>
 
           <button
