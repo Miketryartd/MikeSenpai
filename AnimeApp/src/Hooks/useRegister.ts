@@ -13,7 +13,7 @@ export const useRegister = () => {
                setError(null);
 
                const data = await authRegister(email, password);
-                 sessionStorage.setItem("token", JSON.stringify(data));
+                 sessionStorage.setItem("token", data.token);
                return data;
            } catch (err: any){
             console.error("Error registering user ", err);

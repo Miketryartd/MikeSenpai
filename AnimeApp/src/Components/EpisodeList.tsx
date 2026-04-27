@@ -9,13 +9,65 @@ type Props = {
 function EpisodeList({ onSelectEp }: Props) {
   const { id } = useParams();
   const { result, loading, error } = useAnimeStream(id);
-  const [activeChunk, setActiveChunk] = useState(0); 
+  const [activeChunk, setActiveChunk] = useState(0);
+  const [audioType, setAudioType] = useState<"sub" | "dub">("sub"); 
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
   if (!result) return <p>No data</p>;
 
   const episodes = result.local?.ep ?? [];
+  const mainLink = result.local?.link;
+  const hasEpisodes = episodes.length > 0;
+  const hasFallbackLink = mainLink && typeof mainLink === "string";
+
+  
+  const applyType = (link: string) =>
+    link.replace("src=", "").replace(/\/(sub|dub)/, `/${audioType}`);
+
+  const AudioToggle = () => (
+    <div className="flex gap-2 mb-5">
+      {(["sub", "dub"] as const).map((type) => (
+        <button
+          key={type}
+          onClick={() => setAudioType(type)}
+          className={`px-4 py-1.5 rounded-lg text-sm font-semibold uppercase tracking-widest transition cursor-pointer border
+            ${audioType === type
+              ? "bg-purple-700 border-purple-700 text-white"
+              : "bg-[#1a1a24] border-purple-800 text-purple-400 hover:bg-purple-800"
+            }`}
+        >
+          {type === "sub" ? "🇯🇵 Sub" : "🇺🇸 Dub"}
+        </button>
+      ))}
+    </div>
+  );
+
+ 
+  if (!hasEpisodes && hasFallbackLink) {
+    return (
+      <div id="watch-section" className="px-6 pb-10">
+        <h1 className="text-2xl font-semibold text-purple-400 mb-4">Available Episodes</h1>
+        <AudioToggle />
+        <button
+          className="bg-purple-700 hover:bg-purple-600 px-6 py-2 rounded-lg transition cursor-pointer text-sm text-white font-semibold"
+          onClick={() => onSelectEp(applyType(mainLink))}
+        >
+           Watch {result.local?.name}
+        </button>
+      </div>
+    );
+  }
+
+
+  if (!hasEpisodes && !hasFallbackLink) {
+    return (
+      <div id="watch-section" className="px-6 pb-10">
+        <h1 className="text-2xl font-semibold text-purple-400 mb-4">Available Episodes</h1>
+        <p className="text-gray-500 text-sm">No episodes available.</p>
+      </div>
+    );
+  }
 
 
   const CHUNK_SIZE = 100;
@@ -24,31 +76,27 @@ function EpisodeList({ onSelectEp }: Props) {
     chunks.push(episodes.slice(i, i + CHUNK_SIZE));
   }
 
-
-
   const visibleEpisodes = chunks[activeChunk] ?? [];
 
   return (
     <div id="watch-section" className="px-6 pb-10">
-      <h1 className="text-2xl font-semibold text-purple-400 mb-4">
-        Available Episodes
-      </h1>
+      <h1 className="text-2xl font-semibold text-purple-400 mb-4">Available Episodes</h1>
 
-  
+      <AudioToggle />
+
       {chunks.length > 1 && (
         <div className="flex flex-wrap gap-2 mb-5">
           {chunks.map((_, chunkIdx) => {
             const start = chunkIdx * CHUNK_SIZE + 1;
             const end = Math.min((chunkIdx + 1) * CHUNK_SIZE, episodes.length);
-         
             return (
               <button
                 key={chunkIdx}
                 onClick={() => setActiveChunk(chunkIdx)}
                 className={`px-4 py-1.5 rounded-lg text-sm font-semibold uppercase tracking-widest transition cursor-pointer border
                   ${activeChunk === chunkIdx
-                    ? "bg-purple-700 border-purple-700 text-white"         
-                    : "bg-[#1a1a24] border-purple-800 text-purple-400 hover:bg-purple-800"  
+                    ? "bg-purple-700 border-purple-700 text-white"
+                    : "bg-[#1a1a24] border-purple-800 text-purple-400 hover:bg-purple-800"
                   }`}
               >
                 {start}–{end}
@@ -60,15 +108,12 @@ function EpisodeList({ onSelectEp }: Props) {
 
       <div className="flex flex-wrap gap-3">
         {visibleEpisodes.map((e, idx) => {
-          const cleanLink = e.link.replace("src=", "");
           const epNumber = activeChunk * CHUNK_SIZE + idx + 1;
-         
-
           return (
             <button
               key={idx}
               className="bg-[#1a1a24] hover:bg-purple-600 px-4 py-2 rounded-lg transition cursor-pointer text-sm text-gray-200"
-              onClick={() => onSelectEp(cleanLink)}
+              onClick={() => onSelectEp(applyType(e.link))}
             >
               Episode {epNumber}
             </button>

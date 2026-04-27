@@ -5,7 +5,7 @@ import { GENRES } from "../Config/genres";
 import AnimeCard from "./AnimeCard";
 
 function AnimeGenre() {
-  const [activeGenre, setActiveGenre] = useState<string | null>("Action");
+  const [activeGenre, setActiveGenre] = useState<string | null>("Romance");
   const [page, setPage] = useState(1);
   const { results, loading, error } = useGenre(activeGenre, page);
   const { previews } = useGenrePreviews(); 
