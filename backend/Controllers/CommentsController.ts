@@ -4,6 +4,9 @@ import CommentZod from "../ZodMod/CommentZod.js";
 
 export const addComment = async (req: Request, res: Response) => {
   try {
+    console.log("req.user full object:", (req as any).user);
+    const userId = (req as any).user._id;
+    const userEmail = (req as any).user.email;
     const { comment } = req.body;
     const {id, finder} = req.params;
 
@@ -17,9 +20,11 @@ export const addComment = async (req: Request, res: Response) => {
     }
 
     const validatedData = safecomment.data;
-    const ani_id = Number( validatedData.   id);
+    const ani_id = Number( validatedData.id);
     const ani_find = validatedData.finder;
     const newComment = new CommentMod({
+      uid: userId,
+      email: userEmail,
       comment: validatedData.comment,
       id: ani_id,
       finder: ani_find,

@@ -34,7 +34,7 @@ export const UserRegister = async (req: Request, res: Response) => {
     console.log("user saved:", savedUser);
 
     const token = jwt.sign({
-        id: savedUser._id, email: savedUser.email
+        _id: savedUser._id, email: savedUser.email
     },
     process.env.JWT_TOKEN_REF_PRIV as string,
 {expiresIn: "7d"});

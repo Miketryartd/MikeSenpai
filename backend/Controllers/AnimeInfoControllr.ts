@@ -21,7 +21,10 @@ export const getAnimeInfo = async (req: Request, res: Response) => {
 
     
     const resp = await fetch(`https://anipub.xyz/api/info/${id}`);
-    if (!resp.ok) throw new Error(`HTTP error: ${resp.status}`);
+   if (resp.status === 429 || resp.status === 400) {
+  return res.status(200).json(null);
+}
+if (!resp.ok) throw new Error(`HTTP error: ${resp.status}`);
 
     const d = await resp.json();
 

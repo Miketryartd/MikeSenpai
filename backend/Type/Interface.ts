@@ -123,6 +123,6 @@ export type AniData = {
   }
 
   export interface TokenPayload {
-  id: string;
+  _id: string;
   email: string;
 }
