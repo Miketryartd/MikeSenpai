@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useComment } from "../Hooks/useComment";
 import { useParams } from "react-router";
 
 function CommentSection() {
-  const { loading, error, addComment } = useComment();
+  const { loading, error, addComment, loadComments, comments } = useComment();
   const [comment, setComment] = useState<string>("");
    
   const {id, finder} = useParams();
   if (!id || !finder) return <p>Invalid route</p>
-  console.log(id, finder);
+
+  useEffect(() => {
+  loadComments(id, finder);
+}, [id, finder]);
+
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -18,8 +22,11 @@ function CommentSection() {
    
     if (success) {
       setComment(""); 
+       await loadComments(id, finder);
     }
   };
+
+
 
   return (
     <div className="w-full  max-w-xl mx-auto mt-4">
@@ -67,6 +74,27 @@ function CommentSection() {
           )}
         </button>
       </form>
+
+    <div className="mt-6 space-y-3">
+  {Array.isArray(comments) &&
+    comments.map((c) => (
+      <div
+        key={c._id}
+        className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 shadow-sm hover:border-purple-700 transition"
+      >
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-xs text-zinc-400">{c.email.slice(0, 5)}</p>
+          <p className="text-[10px] text-zinc-500">
+            {new Date(c.createdAt).toLocaleString()}
+          </p>
+        </div>
+
+        <p className="text-white text-sm leading-relaxed">
+          {c.comment}
+        </p>
+      </div>
+    ))}
+</div>
     </div>
   );
 }

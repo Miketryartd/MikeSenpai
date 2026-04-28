@@ -10,7 +10,7 @@ export function useAnimeAll() {
     const fetchData = async () => {
       try {
         const data: number = await getAllAnime(); 
-        console.log("API RES", data);
+  
         setAnime(data);
       } catch (err: unknown) {
         console.error("Error fetching all anime", err);

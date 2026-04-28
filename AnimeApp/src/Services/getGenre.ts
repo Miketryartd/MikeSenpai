@@ -8,7 +8,7 @@ export const getGenre = async (genre: string | number, page: number | string) =>
     
         
         const url = `${DynamicUrl()}/mikesenpai/api/findByGenre/${genre}?page=${page}`;
-        console.log("FINAL URL:", url);
+     
         const res = await fetch(url, {
             method: "GET",
             headers: {
