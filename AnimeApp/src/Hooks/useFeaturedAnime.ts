@@ -53,11 +53,16 @@ const fetchWithConcurrency = async (
 };
 
 export const useFeaturedAnime = () => {
-  const [animeList, setAnimeList]             = useState<AnimeDetailProps[]>([]);
   const [isLoading, setIsLoading]             = useState<boolean>(false);
   const [isFetchingMore, setIsFetchingMore]   = useState<boolean>(false);
   const [error, setError]                     = useState<string | null>(null);
   const [hasMore, setHasMore]                 = useState<boolean>(true);
+  const CACHE_KEY = "featuredAnime";
+
+  const [animeList, setAnimeList] = useState<AnimeDetailProps[]>(() => {
+  const cached = sessionStorage.getItem(CACHE_KEY);
+  return cached ? JSON.parse(cached) : [];
+});
 
 
   const usedIdsRef = useRef<Set<number>>(new Set());
@@ -102,7 +107,12 @@ export const useFeaturedAnime = () => {
       );
 
    
-      setAnimeList((prev) => [...prev, ...cleaned]);
+      setAnimeList((prev) => {
+  const updated = [...prev, ...cleaned];
+  sessionStorage.setItem(CACHE_KEY, JSON.stringify(updated));
+  return updated;
+});
+      
 
    
       if (usedIdsRef.current.size >= TOTAL_IN_DB) {
