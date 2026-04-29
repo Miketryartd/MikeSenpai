@@ -1,7 +1,7 @@
   import { useState } from "react";
   import img from "../assets/Images/removebg.png";
   import { useRegister } from "../Hooks/useRegister";
-  import { useNavigate } from "react-router-dom";
+  import { Link, useNavigate } from "react-router-dom";
 
   function Register() {
     const [email, setEmail] = useState<string>("");
@@ -22,7 +22,8 @@
 
     return (
       <div className="min-h-screen w-full flex bg-[#0d0d14]">
-
+   
+   
         <div className="hidden md:flex w-1/2 items-center justify-center bg-purple-900/20 relative">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 to-black/80" />
 
@@ -32,7 +33,10 @@
             className="w-64 h-64 object-cover z-10 drop-shadow-2xl bg-purple-400 rounded-full"
           />
         </div>
-
+                     
+                     <div className="text-white p-5">
+                      <button className="cursor-pointer transition hover:text-purple-600 ease-in-out duration-2s" onClick={() => window.history.back()}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-left"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l14 0" /><path d="M5 12l4 4" /><path d="M5 12l4 -4" /></svg></button>
+                     </div>
         <div className="w-full md:w-1/2 flex items-center justify-center p-6">
 
           <div className="w-full max-w-md bg-[#16162a] border border-[#2d2d4a] rounded-2xl p-8 shadow-xl">
@@ -80,6 +84,11 @@
               </button>
 
             </form>
+
+            <div className="flex flex-row gap-1 mt-5">
+              <p className="text-md text-white">Already have an account?</p>
+              <Link className="text-md text-purple-600" to='/Login'>Log in.</Link>
+            </div>
 
           </div>
         </div>

@@ -42,7 +42,7 @@ function CommentSection() {
       >
         <input
           type="text"
-          placeholder="Add a comment..."
+          placeholder="Share what you think..."
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           className="flex-1 bg-transparent outline-none text-white placeholder-zinc-400"
@@ -84,7 +84,7 @@ function CommentSection() {
       >
         <div className="flex items-center justify-between mb-1">
           <p className="text-xs text-zinc-400">{c.email.slice(0, 5)}</p>
-          <p className="text-[10px] text-zinc-500">
+          <p className="text-[10px] text-zinc-500 text-wrap">
             {new Date(c.createdAt).toLocaleString()}
           </p>
         </div>

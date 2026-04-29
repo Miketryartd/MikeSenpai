@@ -1,6 +1,6 @@
   import React, { useState } from "react";
   import img from "../assets/Images/removebg.png";
-  import { useNavigate } from "react-router-dom";
+  import { Link, useNavigate } from "react-router-dom";
 import { useLogin } from "../Hooks/useLogin";
 
   function Login() {
@@ -79,8 +79,12 @@ import { useLogin } from "../Hooks/useLogin";
               >
               {loading ? "Loging in..." : "Log in"}
               </button>
-
+         
             </form>
+               <div className="flex flex-row gap-1 mt-5">
+              <p className="text-md text-white">Don't have an account?</p>
+              <Link className="text-md text-purple-600" to='/Register'>Register.</Link>
+            </div>
 
           </div>
         </div>

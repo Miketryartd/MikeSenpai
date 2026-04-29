@@ -3,11 +3,11 @@ import SourceBadge from "./SourceBadge";
 import WatchOverlay from "./WatchOverlay";
 function AnimeCard({ Name, Image, Id, finder }: AnimeSearch) {
   return (
-    <div className="mt-10 group bg-[#16162a] border border-[#2d2d4a] rounded-lg overflow-hidden
-                    hover:border-purple-600 hover:-translate-y-1 transition-all duration-200 cursor-pointer">
+    <div className="mt-10 group bg-[#16162a]  border border-[#2d2d4a] rounded-lg overflow-hidden
+                  hover:-translate-y-1 transition-all duration-200 cursor-pointer">
       
       <WatchOverlay id={Id} finder={finder}>
-        <div className="relative aspect-[2/3] w-full overflow-hidden bg-gray-800">
+        <div className="relative aspect-[3/3] w-full overflow-hidden bg-gray-800">
           <img
             src={Image}
             alt={Name}
