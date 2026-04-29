@@ -8,10 +8,11 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-  "start": "node dist/server.js",
-  "dev": "tsx server.ts"
+    "start": "node dist/server.js",
+    "dev": "tsx server.ts"
   },
   "dependencies": {
+    "@consumet/extensions": "^1.8.8",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
