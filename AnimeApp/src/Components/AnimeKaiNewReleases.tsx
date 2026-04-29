@@ -1,8 +1,9 @@
-// frontend/src/Components/AnimeKaiNewReleases.tsx
+
 import { useState } from "react";
 import { useAnimeKaiNewReleases } from "../Hooks/useAnimeKaiNewReleases";
 import WatchOverlay from "./WatchOverlay";
 import type { AnimeKaiAnime } from "../Types/AnimeKaiTypes";
+import SourceBadge from "./SourceBadge";
 
 function AnimeKaiNewReleases() {
   const [page, setPage] = useState(1);
@@ -92,7 +93,12 @@ function AnimeKaiNewReleases() {
                 <div className="absolute bottom-1.5 left-1.5 bg-purple-600/90 text-white text-[10px] px-1.5 py-0.5 rounded">
                   {anime.type}
                 </div>
+
+                <div className="absolute top-1.5 right-1.5">
+                  <SourceBadge source="animekai" size="sm" showLabel={false} />
+                </div>
                 <div className="absolute bottom-1.5 right-1.5 flex gap-0.5">
+       
                   {(anime.subCount ?? 0) > 0 && (
                     <span className="bg-blue-600/90 text-white text-[9px] px-1 py-0.5 rounded">SUB</span>
                   )}

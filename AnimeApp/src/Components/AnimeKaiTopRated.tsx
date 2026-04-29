@@ -1,4 +1,4 @@
-// frontend/src/Components/AnimeKaiTopRated.tsx
+import SourceBadge from "./SourceBadge";
 import { useState } from "react";
 import { useAnimeKaiTopRated } from "../Hooks/useAnimeKaiTopRated";
 import WatchOverlay from "./WatchOverlay";
@@ -89,6 +89,10 @@ function AnimeKaiTopRated() {
                     #{anime.rank}
                   </div>
                 )}
+
+                  <div className="absolute bottom-2 right-2 ">
+                  <SourceBadge source="animekai" size="sm" showLabel={false}/>
+                  </div>
                 <div className="absolute bottom-1.5 left-1.5 bg-purple-600/90 text-white text-[10px] px-1.5 py-0.5 rounded">
                   {anime.type}
                 </div>

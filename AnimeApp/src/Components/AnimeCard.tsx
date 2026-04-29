@@ -1,6 +1,6 @@
 import type { AnimeSearch } from "../Types/Interface";
+import SourceBadge from "./SourceBadge";
 import WatchOverlay from "./WatchOverlay";
-
 function AnimeCard({ Name, Image, Id, finder }: AnimeSearch) {
   return (
     <div className="mt-10 group bg-[#16162a] border border-[#2d2d4a] rounded-lg overflow-hidden
@@ -15,8 +15,12 @@ function AnimeCard({ Name, Image, Id, finder }: AnimeSearch) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
+         <div className="absolute top-2 right-2 ">
+                  <SourceBadge source="anipub" size="sm" showLabel={false}/>
+                  </div>
       </WatchOverlay>
-
+    
+     
       <div className="p-1.5">
         <p className="text-xs font-medium text-white truncate">{Name}</p>
       </div>

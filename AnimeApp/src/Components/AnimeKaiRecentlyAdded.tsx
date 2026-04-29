@@ -1,11 +1,12 @@
-// frontend/src/Components/AnimeKaiRecentlyAdded.tsx
+
 import { useState, useRef } from "react";
 import { useAnimeKaiRecentlyAdded } from "../Hooks/useAnimeKaiRecentlyAdded";
 import WatchOverlay from "./WatchOverlay";
 import type { AnimeKaiAnime } from "../Types/AnimeKaiTypes";
+import SourceBadge from "./SourceBadge";
 
 function AnimeKaiRecentlyAdded() {
-  const [page] = useState(1);  // Changed from setPage to just page
+  const [page] = useState(1);  
   const scrollRef = useRef<HTMLDivElement>(null);
   const { data, loading, error } = useAnimeKaiRecentlyAdded(page);
 
@@ -74,23 +75,30 @@ function AnimeKaiRecentlyAdded() {
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {data.results.map((anime: AnimeKaiAnime) => (
-          <WatchOverlay 
+         
+            <div className="flex-shrink-0 w-40 group cursor-pointer">
+              <div className="relative overflow-hidden rounded-xl transition-all duration-300 group-hover:scale-105">
+                <div className="aspect-[2/3] overflow-hidden rounded-xl">
+                 <WatchOverlay 
             key={anime.id} 
             id={anime.id} 
             finder={anime.title} 
             name={anime.title}
           >
-            <div className="flex-shrink-0 w-40 group cursor-pointer">
-              <div className="relative overflow-hidden rounded-xl transition-all duration-300 group-hover:scale-105">
-                <div className="aspect-[2/3] overflow-hidden rounded-xl">
                   <img
                     src={anime.image}
                     alt={anime.title}
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
+                  </WatchOverlay>
                 </div>
-                <div className="absolute top-2 left-2 bg-green-500/90 backdrop-blur-sm px-2 py-0.5 rounded-full">
+
+                <div className="absolute top-2 right-2 ">
+                  <SourceBadge source="animekai" size="sm" showLabel={false}/>
+                  </div>
+
+                <div className="absolute top-2 left-2 border-bg-green-500/20  backdrop-blur-sm px-2 py-0.5 rounded-full">
                   <span className="text-[9px] font-bold text-white">NEW</span>
                 </div>
               </div>
@@ -101,7 +109,7 @@ function AnimeKaiRecentlyAdded() {
                 <p className="text-[10px] text-gray-500 truncate">{anime.type}</p>
               </div>
             </div>
-          </WatchOverlay>
+     
         ))}
       </div>
     </div>

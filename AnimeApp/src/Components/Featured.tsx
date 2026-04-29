@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useFeaturedAnime } from "../Hooks/useFeaturedAnime";
 import WatchOverlay from "./WatchOverlay";
+import SourceBadge from "./SourceBadge";
 
 function Featured() {
   const {
@@ -87,6 +88,11 @@ function Featured() {
                   loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
+
+                 <div className="absolute bottom-1.5 left-1.5">
+                  <SourceBadge source="anipub" size="sm" showLabel={false} />
+                </div>
+
                 <span className="absolute bottom-1.5 right-1.5 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
                   {anime.epCount ?? "?"} eps
                 </span>
