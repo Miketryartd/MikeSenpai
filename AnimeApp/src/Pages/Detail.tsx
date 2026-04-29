@@ -60,11 +60,11 @@ const DetailSkeleton = () => (
 );
 
 const ServerErrorDisplay = ({ errorType = "animekai", errorMessage = "" }) => {
-  const navigate = useNavigate();
+
   const isAnimeKai = errorType === "animekai";
   
   const handleGoBack = () => {
-    navigate('/');
+    window.history.back();
     setTimeout(() => {
       window.location.reload();
     }, 100);
