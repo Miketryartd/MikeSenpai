@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAnimeDetails } from "../Hooks/useAnimeDetail";
 import { useState } from "react";
 import NavHeader from "../Components/Nav";
@@ -59,7 +59,19 @@ const DetailSkeleton = () => (
 );
 
 const ServerErrorDisplay = ({ errorType = "animekai", errorMessage = "" }) => {
+  const navigate = useNavigate();
   const isAnimeKai = errorType === "animekai";
+  
+  const handleGoBack = () => {
+    navigate('/');
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
+  
+  const handleRetry = () => {
+    window.location.reload();
+  };
   
   return (
     <div className="bg-[#0d0d14] min-h-screen flex items-center justify-center p-4">
@@ -125,6 +137,10 @@ const ServerErrorDisplay = ({ errorType = "animekai", errorMessage = "" }) => {
                   <span className="text-yellow-400">•</span>
                   <span><strong className="text-white">Invalid ID:</strong> The anime ID "{errorMessage}" may not exist in our database</span>
                 </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-400">•</span>
+                  <span><strong className="text-white">Cache Issue:</strong> Stale data might be causing problems</span>
+                </li>
                 <li className="flex items-start gap-2 mt-2 pt-2 border-t border-gray-800">
                   <span className="text-blue-400">ℹ️</span>
                   <span className="text-gray-400">Error details: {errorMessage || "Unknown error"}</span>
@@ -136,13 +152,13 @@ const ServerErrorDisplay = ({ errorType = "animekai", errorMessage = "" }) => {
         
         <div className="flex gap-3 justify-center">
           <button 
-            onClick={() => window.location.reload()} 
+            onClick={handleRetry} 
             className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition text-sm cursor-pointer"
           >
             Retry
           </button>
           <button 
-            onClick={() => window.history.back()} 
+            onClick={handleGoBack} 
             className="px-4 py-2 bg-[#1a1a24] border border-purple-800 rounded-lg hover:bg-purple-800 transition text-sm cursor-pointer"
           >
             Go Back
@@ -160,9 +176,17 @@ const ServerErrorDisplay = ({ errorType = "animekai", errorMessage = "" }) => {
 };
 
 function Detail() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const { loading, result, error } = useAnimeDetails(id);
   const [currentVideo, setCurrentVideo] = useState<string | null>(null);
+
+  const handleGoBackRefresh = () => {
+    navigate('/');
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
 
   if (loading) return <DetailSkeleton />;
   
@@ -185,12 +209,20 @@ function Detail() {
         <img src={logo} className="h-25 w-25 object-cover rounded-md mx-auto mb-4" alt="logo" />
         <p className="text-gray-400 text-sm mb-4">Servers are currently experiencing issues.</p>
         <p className="text-xs text-gray-600 mb-6">Unable to fetch anime details for ID: {id}</p>
-        <button 
-          onClick={() => window.history.back()} 
-          className="cursor-pointer mt-4 px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition text-sm"
-        >
-          Go Back
-        </button>
+        <div className="flex gap-3 justify-center">
+          <button 
+            onClick={() => window.location.reload()} 
+            className="cursor-pointer px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition text-sm"
+          >
+            Retry
+          </button>
+          <button 
+            onClick={handleGoBackRefresh} 
+            className="cursor-pointer px-4 py-2 bg-[#1a1a24] border border-purple-800 rounded-lg hover:bg-purple-800 transition text-sm"
+          >
+            Go Back
+          </button>
+        </div>
       </div>
     </div>
   );

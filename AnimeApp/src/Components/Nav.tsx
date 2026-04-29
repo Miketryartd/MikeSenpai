@@ -7,53 +7,50 @@ import { Link } from "react-router";
 function Nav() {
   const [query, setQuery] = useState<string>("");
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const { results, search, loading, error } = useSearchAnime();
+  const { results, search, loading, error, searchMessage } = useSearchAnime();
   const navRef = useRef<HTMLDivElement>(null); 
 
- const token = sessionStorage.getItem("token");
-const isLoggedIn = !!token;
+  const token = sessionStorage.getItem("token");
+  const isLoggedIn = !!token;
 
-const getUserFromToken = (jwt: string) => {
-  try {
-    
-    const payload = jwt.split(".")[1];
-    
-    return JSON.parse(atob(payload));
-  } catch {
-    return null;
-  }
-};
+  const getUserFromToken = (jwt: string) => {
+    try {
+      const payload = jwt.split(".")[1];
+      return JSON.parse(atob(payload));
+    } catch {
+      return null;
+    }
+  };
 
-const user = token ? getUserFromToken(token) : null;
-const email = user?.email;
-const real_name = email?.slice(0, 1).toUpperCase() ?? "?";
+  const user = token ? getUserFromToken(token) : null;
+  const email = user?.email;
+  const real_name = email?.slice(0, 1).toUpperCase() ?? "?";
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-     
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
       }
     };
 
-    
     document.addEventListener("mousedown", handleClickOutside);
-
- 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []); 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    search(query);
+    if (query.trim()) {
+      search(query);
+    }
     setMenuOpen(false);
   };
 
-  return (
+  const hasResults = results && results.length > 0;
+  const showResults = hasResults || loading || error || searchMessage;
 
+  return (
     <div ref={navRef} className="bg-[#0d0d14] font-sans w-full">
       <div className="max-w-10xl mx-auto">
-
         <nav className="flex items-center justify-between px-6 py-4 border-b border-[#2d2d4a]">
           <div className="flex items-center gap-3">
             <img src={logo} className="h-20 w-20 object-cover rounded-full" />
@@ -74,7 +71,7 @@ const real_name = email?.slice(0, 1).toUpperCase() ?? "?";
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search anime title..."
+                placeholder="Search anime..."
                 className="bg-transparent outline-none px-4 py-2 text-gray-200 placeholder-gray-600 text-sm w-64"
               />
               <button type="submit" className="cursor-pointer bg-purple-700 hover:bg-purple-600 px-4 text-white font-semibold uppercase tracking-widest text-xs transition-colors">
@@ -89,13 +86,13 @@ const real_name = email?.slice(0, 1).toUpperCase() ?? "?";
               </svg>
             </a>
 
-          {isLoggedIn ? (
-            <p className="border rounded-full  bg-gray-600 w-10 h-10 p-2 text-center">{real_name}</p>
-          ): (
-             <Link to='/Register' className="cursor-pointer border border-purple-700 text-purple-400 hover:bg-purple-700 hover:text-white px-5 py-2 rounded-lg text-sm font-semibold uppercase tracking-widest transition-colors">
-            Sign up
-            </Link>
-          )}
+            {isLoggedIn ? (
+              <p className="border rounded-full bg-gray-600 w-10 h-10 p-2 text-center">{real_name}</p>
+            ) : (
+              <Link to='/Register' className="cursor-pointer border border-purple-700 text-purple-400 hover:bg-purple-700 hover:text-white px-5 py-2 rounded-lg text-sm font-semibold uppercase tracking-widest transition-colors">
+                Sign up
+              </Link>
+            )}
           </div>
 
           <button
@@ -137,17 +134,41 @@ const real_name = email?.slice(0, 1).toUpperCase() ?? "?";
         )}
 
         <div className={`px-6 py-6 transition-all duration-300 ${
-          results.length === 0 ? "h-0 overflow-hidden" : "max-h-[500px] overflow-y-auto"
+          !showResults ? "h-0 overflow-hidden p-0" : "max-h-[500px] overflow-y-auto"
         }`}>
-          {loading && <p className="text-center text-gray-500 tracking-widest text-sm">Loading...</p>}
-          {error && <p className="text-center text-red-400 text-sm">{error}</p>}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 z-100">
-            {results.map((a, i) => (
-              <AnimeWrapper key={i} Id={a.Id} finder={a.finder} Name={a.Name} Image={a.Image} />
-            ))}
-          </div>
+          {loading && (
+            <div className="flex items-center justify-center gap-2 py-4">
+              <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-center text-gray-500 tracking-widest text-sm">Searching...</p>
+            </div>
+          )}
+          {error && (
+            <div className="text-center py-4">
+              <p className="text-red-400 text-sm">{error}</p>
+              <button 
+                onClick={() => search(query)} 
+                className="mt-2 text-purple-400 text-xs hover:text-purple-300"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+          {searchMessage && !loading && !error && (
+            <div className="text-center py-4">
+              <p className="text-yellow-400 text-sm">{searchMessage}</p>
+              {query.length <= 2 && (
+                <p className="text-gray-500 text-xs mt-1">💡 Try typing more letters for better results</p>
+              )}
+            </div>
+          )}
+          {hasResults && !loading && !error && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 z-100">
+              {results.map((a, i) => (
+                <AnimeWrapper key={i} Id={a.Id} finder={a.finder} Name={a.Name} Image={a.Image} />
+              ))}
+            </div>
+          )}
         </div>
-
       </div>
     </div>
   );

@@ -41,7 +41,7 @@ function OverlayCard() {
           
           <div className="p-6">
             <p className="text-gray-300 text-sm mb-4">
-              To help you know which anime source is reliable, we've added visual indicators:
+              To help you know which anime source is reliable, I've added visual indicators:
             </p>
             
             <div className="space-y-4">
@@ -62,7 +62,7 @@ function OverlayCard() {
               
               <div className="flex items-center gap-3 p-3 bg-orange-500/10 rounded-xl border border-orange-500/30">
                 <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
-                  <span className="text-orange-400 text-xl font-bold">⚠</span>
+                  <span className="text-orange-400 text-xl font-bold">U</span>
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ function OverlayCard() {
             
             <div className="mt-6 p-3 bg-purple-800/10 rounded-xl border border-purple-500/30">
               <p className="text-purple-300 text-xs text-center">
-                💡 If an anime doesn't load, try refreshing or check back later.
+                 If an anime doesn't load, try refreshing or check back later.
                 <br />
                 I'm working to improve source reliability!
               </p>
