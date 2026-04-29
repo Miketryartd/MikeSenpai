@@ -8,6 +8,7 @@ import Main from './Pages/Main.tsx';
 import Detail from './Pages/Detail.tsx'
 import Register from './Pages/Register.tsx';
 import { Analytics } from '@vercel/analytics/react'
+import Login from './Pages/Login.tsx'
 
 
 createRoot(document.getElementById('root')!).render(
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')!).render(
        
 
         <Route path='/Register' element={<Register/>}></Route>
+        <Route path='/Login' element={<Login/>}></Route>
 
       </Routes>
    </BrowserRouter>
