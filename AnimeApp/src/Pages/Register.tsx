@@ -2,7 +2,7 @@
   import img from "../assets/Images/removebg.png";
   import { useRegister } from "../Hooks/useRegister";
   import { Link, useNavigate } from "react-router-dom";
-
+ import bglogo from "../assets/Images/angel-beats-yui-desktop-wallpaper-preview.jpg";
   function Register() {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
@@ -24,15 +24,23 @@
       <div className="min-h-screen w-full flex bg-[#0d0d14]">
    
    
-        <div className="hidden md:flex w-1/2 items-center justify-center bg-purple-900/20 relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 to-black/80" />
+            <div
+  className="hidden md:flex w-1/2 items-center justify-center relative bg-cover "
+  style={{ backgroundImage: `url(${bglogo})` }}
+>
 
-          <img
-            src={img}
-            alt="logo"
-            className="w-64 h-64 object-cover z-10 drop-shadow-2xl bg-purple-400 rounded-full"
-          />
-        </div>
+  <div className="absolute inset-0 backdrop-blur-sm bg-black/50" />
+
+ 
+  <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 to-black/80" />
+
+
+  <img
+    src={img}
+    alt="logo"
+    className="w-64 h-64 object-cover z-10 drop-shadow-2xl bg-purple-400/20 shadow-md shadow-purple-400 rounded-full"
+  />
+</div>
                      
                      <div className="text-white p-5">
                       <button className="cursor-pointer transition hover:text-purple-600 ease-in-out duration-2s" onClick={() => window.history.back()}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-left"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l14 0" /><path d="M5 12l4 4" /><path d="M5 12l4 -4" /></svg></button>
@@ -57,7 +65,7 @@
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   placeholder="MichaelOliverM18@gmail.com"
-                  className="mt-2 w-full p-3 rounded-lg bg-[#0d0d14] border border-[#2d2d4a] text-white"
+                  className="mt-2 w-full p-3 rounded-lg bg-[#0d0d14] border outline-none border-[#2d2d4a] text-white hover:border-purple-700 active:border-purple-700"
                 />
               </div>
 
@@ -67,7 +75,7 @@
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   placeholder="Password"
-                  className="mt-2 w-full p-3 rounded-lg bg-[#0d0d14] border border-[#2d2d4a] text-white"
+                  className="mt-2 w-full p-3 rounded-lg bg-[#0d0d14] border outline-none border-[#2d2d4a] text-white hover:border-purple-700 active:border-purple-700"
                 />
               </div>
 

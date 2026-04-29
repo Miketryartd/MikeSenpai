@@ -2,7 +2,7 @@
   import img from "../assets/Images/removebg.png";
   import { Link, useNavigate } from "react-router-dom";
 import { useLogin } from "../Hooks/useLogin";
-
+import bglogo from "../assets/Images/wallpapersden.com_anime-girl-4k-staring_3840x2160.jpg";
   function Login() {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
@@ -24,15 +24,26 @@ import { useLogin } from "../Hooks/useLogin";
     return (
       <div className="min-h-screen w-full flex bg-[#0d0d14]">
 
-        <div className="hidden md:flex w-1/2 items-center justify-center bg-purple-900/20 relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 to-black/80" />
+     <div
+  className="hidden md:flex w-1/2 items-center justify-center relative bg-cover "
+  style={{ backgroundImage: `url(${bglogo})` }}
+>
 
-          <img
-            src={img}
-            alt="logo"
-            className="w-64 h-64 object-cover z-10 drop-shadow-2xl bg-purple-400 rounded-full"
-          />
-        </div>
+  <div className="absolute inset-0 backdrop-blur-sm bg-black/50" />
+
+ 
+  <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 to-black/80" />
+
+
+  <img
+    src={img}
+    alt="logo"
+    className="w-64 h-64 object-cover z-10 drop-shadow-2xl bg-purple-400/20 shadow-md shadow-purple-400 rounded-full"
+  />
+</div>
+          <div className="text-white p-5">
+                      <button className="cursor-pointer transition hover:text-purple-600 ease-in-out duration-2s" onClick={() => window.history.back()}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-left"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l14 0" /><path d="M5 12l4 4" /><path d="M5 12l4 -4" /></svg></button>
+                     </div>
 
         <div className="w-full md:w-1/2 flex items-center justify-center p-6">
 
@@ -43,7 +54,7 @@ import { useLogin } from "../Hooks/useLogin";
             </h1>
 
             <p className="text-sm text-gray-400 text-center mb-8">
-             Follow my github and star my repository, I really appreciate it!
+           I appreciate the follow!
             </p>
 
             <form onSubmit={handleLogin} className="flex flex-col gap-5">
@@ -54,7 +65,7 @@ import { useLogin } from "../Hooks/useLogin";
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   placeholder="MichaelOliverM18@gmail.com"
-                  className="mt-2 w-full p-3 rounded-lg bg-[#0d0d14] border border-[#2d2d4a] text-white"
+                  className="mt-2 w-full p-3 rounded-lg bg-[#0d0d14] border outline-none border-[#2d2d4a] text-white hover:border-purple-700 active:border-purple-700"
                 />
               </div>
 
@@ -64,7 +75,7 @@ import { useLogin } from "../Hooks/useLogin";
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   placeholder="Password"
-                  className="mt-2 w-full p-3 rounded-lg bg-[#0d0d14] border border-[#2d2d4a] text-white"
+                  className="mt-2 w-full p-3 rounded-lg bg-[#0d0d14] border outline-none border-[#2d2d4a] text-white hover:border-purple-700 active:border-purple-700"
                 />
               </div>
 
