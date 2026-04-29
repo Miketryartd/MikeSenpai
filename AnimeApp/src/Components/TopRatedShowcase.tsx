@@ -60,7 +60,7 @@ const handleNext = () => {
     <div className="">
       {/* ── HEADER ── */}
       <div className="flex items-center gap-3 px-4 py-2">
-        <h1 className="text-xl font-semibold text-white">Top Rated Anime</h1>
+        <h1 className="text-xl font-semibold text-white">Popular</h1>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-purple-400">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M12 1.67a2.914 2.914 0 0 0 -2.492 1.403l-8.11 13.537a2.914 2.914 0 0 0 2.484 4.385h16.225a2.914 2.914 0 0 0 2.503 -4.371l-8.116 -13.546a2.917 2.917 0 0 0 -2.494 -1.408z" />

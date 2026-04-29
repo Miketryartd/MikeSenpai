@@ -1,16 +1,19 @@
 import AnimeGenre from "../Components/AnimeGenre";
+import AnimeKaiNewReleases from "../Components/AnimeKaiNewReleases";
+import AnimeKaiTopRated from "../Components/AnimeKaiTopRated";
+import AnimeKaiRecentlyAdded from "../Components/AnimeKaiRecentlyAdded";
+import AnimeKaiLatestCompleted from "../Components/AnimeKaiLatestCompleted";
 import BingeWorth from "../Components/Featured";
 import Hero from "../Components/Hero";
 import Nav from "../Components/Nav";
 import TopRatedShowcase from "../Components/TopRatedShowcase";
+import NewReleases from "../Components/NewRelease";
 import { useAnimeAll } from "../Hooks/useAnimeAll";
 import fixlogo from "../assets/Images/5cb1c11b-5c0e-42cc-8c6a-c5039ba24543-removebg-preview.png";
-
 
 const HeroSkeleton = () => (
   <div className="w-full h-[400px] bg-gray-800 animate-pulse rounded-lg" />
 );
-
 
 const TopRatedSkeleton = () => (
   <div className="p-4">
@@ -28,7 +31,6 @@ const TopRatedSkeleton = () => (
     </div>
   </div>
 );
-
 
 const GenreSkeleton = () => (
   <div className="p-4">
@@ -58,7 +60,6 @@ const GridSkeleton = () => (
   </div>
 );
 
-
 const PageSkeleton = () => (
   <div className="bg-[#0d0d14] w-full min-h-screen">
     <Nav />
@@ -80,7 +81,6 @@ const PageSkeleton = () => (
 function Main() {
   const { anime, loading, error } = useAnimeAll();
 
-
   if (loading) return <PageSkeleton />;
   if (error) return (
     <div className="bg-[#0d0d14] w-full min-h-screen flex items-center justify-center">
@@ -92,22 +92,55 @@ function Main() {
     <>
       <div className="bg-[#0d0d14] text-purple-500 w-full min-h-screen">
         <Nav />
+        
+        {/* Hero Section - Anipub (Spotlight) */}
         <div>
           <Hero />
         </div>
-        <div className="pt-10">
+
+        {/* AnimeKai - Fresh Content (Visual Accent) */}
+        <div className="mt-8">
+          <AnimeKaiNewReleases />
+        </div>
+
+        {/* AnimeKai - Horizontal Scrollers (Visual Variety) */}
+        <div className="mt-4">
+          <AnimeKaiRecentlyAdded />
+        </div>
+        
+        <div className="mt-2">
+          <AnimeKaiLatestCompleted />
+        </div>
+
+        {/* Anipub - Main Content (Primary) */}
+        <div className="pt-4">
           <TopRatedShowcase />
         </div>
+
+        {/* AnimeKai - Top Rated (Visual Accent) */}
+        <div className="pt-4">
+          <AnimeKaiTopRated />
+        </div>
+
+        {/* Anipub - Genre Section (Primary) */}
         <div className="pt-10">
           <AnimeGenre />
         </div>
+
+        {/* Anipub - Binge Worth Section (Primary) */}
         <div>
           <BingeWorth />
         </div>
-        <div className="flex flex-col">
-          <p>I WILL KEEP ADDING STUFF LATER, MEANWHILE PLS LIKE MY GIT REPO</p>
-          <img className="h-30 w-30 object-cover" src={fixlogo} />
-          <h1>Total anime: {anime}</h1>
+
+        {/* Footer */}
+        <div className="flex flex-col items-center justify-center py-12 border-t border-[#2d2d4a] mt-12">
+          <p className="text-gray-500 text-sm tracking-wider mb-3">
+            I WILL KEEP ADDING STUFF LATER, MEANWHILE PLS LIKE MY GIT REPO
+          </p>
+          <img className="h-24 w-24 object-cover rounded-full opacity-75 hover:opacity-100 transition-opacity duration-300" src={fixlogo} />
+          <div className="mt-4 px-4 py-2 bg-purple-500/10 rounded-full">
+            <h1 className="text-sm text-purple-400">Total anime in database: {anime}</h1>
+          </div>
         </div>
       </div>
     </>

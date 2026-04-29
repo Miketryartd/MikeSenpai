@@ -68,7 +68,7 @@ function Featured() {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-white">Binge Worthy</h2>
+        <h2 className="text-lg font-bold text-white">Featured</h2>
         <span className="text-xs text-gray-500">{animeList.length} anime loaded</span>
       </div>
 
