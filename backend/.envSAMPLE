@@ -1,0 +1,5 @@
+
+
+JWT_TOKEN_REF_PRIV=fuckyou
+
+MONGOOSE_SECRET_PRIV_KEY=mongodb
