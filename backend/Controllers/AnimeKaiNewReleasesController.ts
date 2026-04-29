@@ -171,3 +171,37 @@ export const getLatestCompleted = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+
+const getStringParam = (param: string | string[] | undefined): string => {
+  if (!param) return "";
+  if (Array.isArray(param)) return param[0];
+  return param;
+};
+
+
+export const getAnimeInfoWithRecommendations = async (req: Request, res: Response) => {
+  try {
+    const id = getStringParam(req.params.id);
+    if (!id) {
+      return res.status(400).json({ success: false, error: "No ID provided" });
+    }
+    
+    const info = await animekai.fetchAnimeInfo(id);
+    
+    let recommendations = [];
+    if ((info as any).recommendations && (info as any).recommendations.length) {
+      recommendations = (info as any).recommendations;
+    }
+    
+    res.json({
+      success: true,
+      id: info.id,
+      title: info.title,
+      recommendations: recommendations,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

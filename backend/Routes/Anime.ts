@@ -7,7 +7,7 @@ import { getStream } from "../Controllers/StreamAnimeController.js";
 import { findByGenre } from "../Controllers/FindByGenreController.js";
 import {getAnimeInfo} from "../Controllers/AnimeInfoControllr.js";
 import { getTopRated, getTopRatedByType } from "../Controllers/AnimeKaiTopRatedController.js";
-import { getNewReleases, getRecentlyUpdated, getRecentlyAdded, getLatestCompleted } from "../Controllers/AnimeKaiNewReleasesController.js";
+import { getNewReleases, getRecentlyUpdated, getRecentlyAdded, getLatestCompleted, getAnimeInfoWithRecommendations } from "../Controllers/AnimeKaiNewReleasesController.js";
 const router = express.Router();
 
 // AnimeKai Top Rated Routes
@@ -19,6 +19,7 @@ router.get('/api/animekai/new-releases', getNewReleases);
 router.get('/api/animekai/recently-updated', getRecentlyUpdated);
 router.get('/api/animekai/recently-added', getRecentlyAdded);
 router.get('/api/animekai/latest-completed', getLatestCompleted);
+router.get('/api/animekai/info/:id', getAnimeInfoWithRecommendations);
 
 
 //anipub

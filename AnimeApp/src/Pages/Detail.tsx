@@ -6,6 +6,7 @@ import EpisodeList from "../Components/EpisodeList";
 import Stream from "../Components/Stream";
 import CommentSection from "../Components/CommentSection";
 import logo from "../assets/Images/android-chrome-512x512.png";
+import DetailRecommendation from "../Components/DetailRecommendation";
 
 const DetailSkeleton = () => (
   <div className="bg-[#0d0d14] min-h-screen text-white">
@@ -305,6 +306,10 @@ function Detail() {
         </div>
         <div id="watch-section" className="mt-10">
           <EpisodeList onSelectEp={setCurrentVideo} />
+        </div>
+
+        <div>
+          <DetailRecommendation currentAnimeId={id || ""}/>
         </div>
         <div className="mt-10 p-10">
           <CommentSection />
