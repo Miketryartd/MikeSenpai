@@ -10,7 +10,8 @@ function EpisodeList({ onSelectEp }: Props) {
   const { id } = useParams();
   const { result, loading, error } = useAnimeStream(id);
   const [activeChunk, setActiveChunk] = useState(0);
-  const [audioType, setAudioType] = useState<"sub" | "dub">("sub"); 
+  const [audioType, setAudioType] = useState<"sub" | "dub">("sub");
+  const [selectedEpisode, setSelectedEpisode] = useState<number | null>(null);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
@@ -21,7 +22,11 @@ function EpisodeList({ onSelectEp }: Props) {
   const hasEpisodes = episodes.length > 0;
   const hasFallbackLink = mainLink && typeof mainLink === "string";
 
-  
+  const handleEpisodeClick = (link: string, epNumber: number) => {
+    setSelectedEpisode(epNumber);
+    onSelectEp(applyType(link));
+  };
+
   const applyType = (link: string) =>
     link.replace("src=", "").replace(/\/(sub|dub)/, `/${audioType}`);
 
@@ -43,7 +48,6 @@ function EpisodeList({ onSelectEp }: Props) {
     </div>
   );
 
- 
   if (!hasEpisodes && hasFallbackLink) {
     return (
       <div id="watch-section" className="px-6 pb-10">
@@ -53,12 +57,11 @@ function EpisodeList({ onSelectEp }: Props) {
           className="bg-purple-700 hover:bg-purple-600 px-6 py-2 rounded-lg transition cursor-pointer text-sm text-white font-semibold"
           onClick={() => onSelectEp(applyType(mainLink))}
         >
-           Watch {result.local?.name}
+          Watch {result.local?.name}
         </button>
       </div>
     );
   }
-
 
   if (!hasEpisodes && !hasFallbackLink) {
     return (
@@ -68,7 +71,6 @@ function EpisodeList({ onSelectEp }: Props) {
       </div>
     );
   }
-
 
   const CHUNK_SIZE = 100;
   const chunks: typeof episodes[] = [];
@@ -109,14 +111,26 @@ function EpisodeList({ onSelectEp }: Props) {
       <div className="flex flex-wrap gap-3">
         {visibleEpisodes.map((e, idx) => {
           const epNumber = activeChunk * CHUNK_SIZE + idx + 1;
+          const isSelected = selectedEpisode === epNumber;
+          
           return (
             <button
-              key={idx}
-              className="bg-[#1a1a24] hover:bg-purple-600 px-4 py-2 rounded-lg transition cursor-pointer text-sm text-gray-200"
-              onClick={() => onSelectEp(applyType(e.link))}
-            >
-              Episode {epNumber}
-            </button>
+  key={idx}
+  className={`px-4 py-2 rounded-lg transition cursor-pointer text-sm inline-flex items-center gap-1.5
+    ${isSelected 
+      ? "bg-purple-600 hover:bg-purple-700 text-white font-semibold border border-purple-500" 
+      : "bg-[#1a1a24] hover:bg-purple-600 text-gray-200"
+    }`}
+  onClick={() => handleEpisodeClick(e.link, epNumber)}
+>
+  <span>{epNumber}</span>
+  {isSelected && (
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" className="inline-block">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" />
+    </svg>
+  )}
+</button>
           );
         })}
       </div>
