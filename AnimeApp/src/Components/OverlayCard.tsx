@@ -92,8 +92,10 @@ function OverlayCard() {
                
               </p>
               <ol className=" text-xs text-center">
+                <li>4/30/2026</li>
                 <li>Anime search</li>
                 <li>Anime caching</li>
+                <li>History (Bookmark not functional yet)</li>
               </ol>
             </div>
           
