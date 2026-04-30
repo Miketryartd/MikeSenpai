@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAnimeStream } from "../Hooks/useAnimeStream";
 import { useParams } from "react-router-dom";
 
@@ -12,6 +12,35 @@ function EpisodeList({ onSelectEp }: Props) {
   const [activeChunk, setActiveChunk] = useState(0);
   const [audioType, setAudioType] = useState<"sub" | "dub">("sub");
   const [selectedEpisode, setSelectedEpisode] = useState<number | null>(null);
+  const [watchedEpisodes, setWatchedEpisodes] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (id) {
+      const storageKey = `watched_${id}`;
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        try {
+          const watchedArray = JSON.parse(saved);
+          setWatchedEpisodes(new Set(watchedArray));
+        } catch (e) {
+          console.error("Failed to parse watched episodes:", e);
+        }
+      }
+    }
+  }, [id]);
+
+  
+  const markAsWatched = (epNumber: number) => {
+    const newWatched = new Set(watchedEpisodes);
+    newWatched.add(epNumber);
+    setWatchedEpisodes(newWatched);
+    
+    
+    if (id) {
+      const storageKey = `watched_${id}`;
+      localStorage.setItem(storageKey, JSON.stringify(Array.from(newWatched)));
+    }
+  };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
@@ -25,6 +54,7 @@ function EpisodeList({ onSelectEp }: Props) {
   const handleEpisodeClick = (link: string, epNumber: number) => {
     setSelectedEpisode(epNumber);
     onSelectEp(applyType(link));
+    markAsWatched(epNumber);
   };
 
   const applyType = (link: string) =>
@@ -55,7 +85,10 @@ function EpisodeList({ onSelectEp }: Props) {
         <AudioToggle />
         <button
           className="bg-purple-700 hover:bg-purple-600 px-6 py-2 rounded-lg transition cursor-pointer text-sm text-white font-semibold"
-          onClick={() => onSelectEp(applyType(mainLink))}
+          onClick={() => {
+            onSelectEp(applyType(mainLink));
+            markAsWatched(1);
+          }}
         >
           Watch {result.local?.name}
         </button>
@@ -112,25 +145,34 @@ function EpisodeList({ onSelectEp }: Props) {
         {visibleEpisodes.map((e, idx) => {
           const epNumber = activeChunk * CHUNK_SIZE + idx + 1;
           const isSelected = selectedEpisode === epNumber;
+          const isWatched = watchedEpisodes.has(epNumber);
           
           return (
             <button
-  key={idx}
-  className={`px-4 py-2 rounded-lg transition cursor-pointer text-sm inline-flex items-center gap-1.5
-    ${isSelected 
-      ? "bg-purple-600 hover:bg-purple-700 text-white font-semibold border border-purple-500" 
-      : "bg-[#1a1a24] hover:bg-purple-600 text-gray-200"
-    }`}
-  onClick={() => handleEpisodeClick(e.link, epNumber)}
->
-  <span>{epNumber}</span>
-  {isSelected && (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" className="inline-block">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" />
-    </svg>
-  )}
-</button>
+              key={idx}
+              className={`px-4 py-2 rounded-lg transition cursor-pointer text-sm inline-flex items-center gap-1.5
+                ${isSelected 
+                  ? "bg-purple-600 hover:bg-purple-700 text-white font-semibold border border-purple-500" 
+                  : isWatched
+                    ? "bg-gray-600 hover:bg-purple-600 text-gray-300 line-through"
+                    : "bg-[#1a1a24] hover:bg-purple-600 text-gray-200"
+                }`}
+              onClick={() => handleEpisodeClick(e.link, epNumber)}
+            >
+              <span>{epNumber}</span>
+              {isSelected && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" className="inline-block">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" />
+                </svg>
+              )}
+              {isWatched && !isSelected && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="inline-block">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                </svg>
+              )}
+            </button>
           );
         })}
       </div>

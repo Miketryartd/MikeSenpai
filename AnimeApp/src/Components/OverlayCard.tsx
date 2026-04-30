@@ -84,6 +84,18 @@ function OverlayCard() {
               </p>
             </div>
           </div>
+
+           <div className="mt-6 p-3 bg-purple-800/10 rounded-xl border border-purple-500/30">
+              <p className="text-purple-300 text-xs text-center">
+                 Changelogs
+                <br />
+               
+              </p>
+              <ol className=" text-xs text-center">
+                <li>Anime search</li>
+                <li>Anime caching</li>
+              </ol>
+            </div>
           
           <div className="p-4 border-t border-[#2d2d4a] bg-black/30">
             <button
