@@ -178,7 +178,8 @@ const ServerErrorDisplay = ({ errorType = "animekai", errorMessage = "" }) => {
 
 function Detail() {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id, finder } = useParams();
+  console.log("Detail page received ID:", id, "finder:", finder);
   const { loading, result, error } = useAnimeDetails(id);
   const [currentVideo, setCurrentVideo] = useState<string | null>(null);
 

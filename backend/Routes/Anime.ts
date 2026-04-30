@@ -5,7 +5,7 @@ import {TopRatedAnime} from "../Controllers/TopRatedAnimeController.js";
 import { getDetails } from "../Controllers/DetailAnimeController.js";
 import { getStream } from "../Controllers/StreamAnimeController.js";
 import { findByGenre } from "../Controllers/FindByGenreController.js";
-import {getAnimeInfo} from "../Controllers/AnimeInfoControllr.js";
+import {getAnimeInfo} from "../Controllers/AnimeInfoController.js";
 import { getTopRated, getTopRatedByType } from "../Controllers/AnimeKaiTopRatedController.js";
 import { getNewReleases, getRecentlyUpdated, getRecentlyAdded, getLatestCompleted, getAnimeInfoWithRecommendations } from "../Controllers/AnimeKaiNewReleasesController.js";
 const router = express.Router();

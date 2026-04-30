@@ -47,7 +47,11 @@ export function useSearchAnime() {
 
     
       if (searchResults.length > 0) {
-        setResults(searchResults);
+        const resultsWithSource = searchResults.map((result: any) => ({
+    ...result,
+    source: data.source || "anipub"
+  }));
+        setResults(resultsWithSource);
         setSearchMessage(null);
       } else {
         setResults([]);
