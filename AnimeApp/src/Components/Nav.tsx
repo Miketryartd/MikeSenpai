@@ -268,7 +268,7 @@ function Nav() {
             {hasResults && !loading && !error && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {results.map((a, i) => (
-                  <AnimeWrapper key={i} Id={a.Id} finder={a.finder} Name={a.Name} Image={a.Image} />
+                  <AnimeWrapper key={i} source={a.source} Id={a.Id} finder={a.finder} Name={a.Name} Image={a.Image} />
                 ))}
               </div>
             )}

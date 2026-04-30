@@ -85,7 +85,7 @@ function OverlayCard() {
             </div>
           </div>
 
-           <div className="mt-6 p-3 bg-purple-800/10 rounded-xl border border-purple-500/30">
+           <div className="mt-6 p-3  m-5 bg-purple-800/10 rounded-xl border border-purple-500/30">
               <p className="text-purple-300 text-xs text-center">
                  Changelogs
                 <br />

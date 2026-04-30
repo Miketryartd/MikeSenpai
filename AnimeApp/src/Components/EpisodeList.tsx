@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAnimeStream } from "../Hooks/useAnimeStream";
+import { useAnimeDetails } from "../Hooks/useAnimeDetail";
 import { useParams } from "react-router-dom";
 
 type Props = {
@@ -7,8 +8,9 @@ type Props = {
 };
 
 function EpisodeList({ onSelectEp }: Props) {
-  const { id } = useParams();
+  const { id, finder } = useParams();
   const { result, loading, error } = useAnimeStream(id);
+  const { result: animeDetail } = useAnimeDetails(id);
   const [activeChunk, setActiveChunk] = useState(0);
   const [audioType, setAudioType] = useState<"sub" | "dub">("sub");
   const [selectedEpisode, setSelectedEpisode] = useState<number | null>(null);
@@ -29,16 +31,32 @@ function EpisodeList({ onSelectEp }: Props) {
     }
   }, [id]);
 
-  
+ 
+  useEffect(() => {
+    if (animeDetail && id && finder) {
+      const animeTitle = animeDetail.local?.Name || finder.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const animeImage = animeDetail.local?.ImagePath || animeDetail.local?.Cover || "";
+      
+      const animeInfo = {
+        title: animeTitle,
+        image: animeImage,
+        finder: finder,
+        id: id
+      };
+      
+      localStorage.setItem(`anime_info_${id}`, JSON.stringify(animeInfo));
+    }
+  }, [animeDetail, id, finder]);
+
   const markAsWatched = (epNumber: number) => {
     const newWatched = new Set(watchedEpisodes);
     newWatched.add(epNumber);
     setWatchedEpisodes(newWatched);
     
-    
     if (id) {
       const storageKey = `watched_${id}`;
       localStorage.setItem(storageKey, JSON.stringify(Array.from(newWatched)));
+      localStorage.setItem(`watched_time_${id}`, Date.now().toString());
     }
   };
 

@@ -1,9 +1,11 @@
+// frontend/src/Components/AnimeCard.tsx
 import type { AnimeSearch } from "../Types/Interface";
 import SourceBadge from "./SourceBadge";
 import WatchOverlay from "./WatchOverlay";
-function AnimeCard({ Name, Image, Id, finder }: AnimeSearch) {
+
+function AnimeCard({ Name, Image, Id, finder, source }: AnimeSearch) {
   return (
-    <div className="mt-10 group bg-[#16162a]  border border-[#2d2d4a] rounded-lg overflow-hidden
+    <div className="mt-10 group bg-[#16162a] border border-[#2d2d4a] rounded-lg overflow-hidden
                   hover:-translate-y-1 transition-all duration-200 cursor-pointer">
       
       <WatchOverlay id={Id} finder={finder}>
@@ -15,12 +17,14 @@ function AnimeCard({ Name, Image, Id, finder }: AnimeSearch) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
-         <div className="absolute top-2 right-2 ">
-                  <SourceBadge source="anipub" size="sm" showLabel={false}/>
-                  </div>
+        {/* Only show badge if source exists */}
+        {source && (
+          <div className="absolute top-2 right-2">
+            <SourceBadge source={source} size="sm" showLabel={false} />
+          </div>
+        )}
       </WatchOverlay>
     
-     
       <div className="p-1.5">
         <p className="text-xs font-medium text-white truncate">{Name}</p>
       </div>

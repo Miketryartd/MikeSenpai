@@ -10,6 +10,7 @@ import TopRatedShowcase from "../Components/TopRatedShowcase";
 import { useAnimeAll } from "../Hooks/useAnimeAll";
 import fixlogo from "../assets/Images/5cb1c11b-5c0e-42cc-8c6a-c5039ba24543-removebg-preview.png";
 import OverlayCard from "../Components/OverlayCard";
+import DashboardSidebar from "../Components/DashboardSidebar";
 
 const HeroSkeleton = () => (
   <div className="w-full h-[400px] bg-gray-800 animate-pulse rounded-lg" />
@@ -91,6 +92,7 @@ function Main() {
   return (
     <>
       <div className="bg-[#0d0d14] text-purple-500 w-full min-h-screen">
+        <DashboardSidebar/>
         <OverlayCard />
         <Nav />
         

@@ -23,7 +23,7 @@ export type AnimeSearch = {
     Name?: string;
     Id?: number | string;
     Image?: string;
-    
+    source: "anipub" | "animekai"
     finder?: string;
 }
 
@@ -94,6 +94,7 @@ export type AniData = {
 
   export type Episode = {
     link: string; 
+    image: string;
   };
   
   export type AnimeStreamingProps = {
