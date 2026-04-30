@@ -1,10 +1,9 @@
 // frontend/src/Hooks/useAnimeKaiNewReleases.ts
 import { useState, useEffect } from "react";
 import { DynamicUrl } from "../Utils/DynamicUrl";
-import type { AnimeKaiNewReleasesResponse } from "../Types/AnimeKaiTypes";
 
 export const useAnimeKaiNewReleases = (page: number = 1) => {
-  const [data, setData] = useState<AnimeKaiNewReleasesResponse | null>(null);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,6 +16,12 @@ export const useAnimeKaiNewReleases = (page: number = 1) => {
         if (result.error) {
           setError(result.error);
         } else {
+          if (result.results) {
+            result.results = result.results.map((anime: any) => ({
+              ...anime,
+              animeKaiId: anime.animeKaiId || anime.title
+            }));
+          }
           setData(result);
         }
       } catch (err: any) {

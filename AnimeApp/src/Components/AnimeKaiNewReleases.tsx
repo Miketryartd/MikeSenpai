@@ -1,13 +1,14 @@
-
+// frontend/src/Components/AnimeKaiNewReleases.tsx
 import { useState } from "react";
 import { useAnimeKaiNewReleases } from "../Hooks/useAnimeKaiNewReleases";
 import WatchOverlay from "./WatchOverlay";
-import type { AnimeKaiAnime } from "../Types/AnimeKaiTypes";
 import SourceBadge from "./SourceBadge";
 
 function AnimeKaiNewReleases() {
   const [page, setPage] = useState(1);
   const { data, loading, error } = useAnimeKaiNewReleases(page);
+
+  const getSlug = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
   if (loading) {
     return (
@@ -31,7 +32,7 @@ function AnimeKaiNewReleases() {
     return (
       <div className="p-4 text-center">
         <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-          <p className="text-red-400 text-sm">AnimeKai New Releases temporarily unavailable</p>
+          <p className="text-red-400 text-sm">New Releases temporarily unavailable</p>
           <button onClick={() => setPage(1)} className="mt-2 text-purple-400 text-sm hover:text-purple-300">
             Retry
           </button>
@@ -40,9 +41,7 @@ function AnimeKaiNewReleases() {
     );
   }
 
-  if (!data || !data.results.length) {
-    return null;
-  }
+  if (!data?.results?.length) return null;
 
   return (
     <div className="p-4">
@@ -62,7 +61,7 @@ function AnimeKaiNewReleases() {
           >
             ‹
           </button>
-          <span className="text-xs text-gray-400">{page} / {data.totalPages}</span>
+          <span className="text-xs text-gray-400">{page} / {data.totalPages || 1}</span>
           <button
             onClick={() => setPage(p => p + 1)}
             disabled={!data.hasNextPage}
@@ -74,46 +73,43 @@ function AnimeKaiNewReleases() {
       </div>
 
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
-        {data.results.slice(0, 12).map((anime: AnimeKaiAnime) => (
-          <WatchOverlay key={anime.id} id={anime.id} finder={anime.title} name={anime.title}>
-            <div className="group bg-[#16162a] border border-[#2d2d4a] rounded-lg overflow-hidden hover:border-purple-600 hover:-translate-y-1 transition-all duration-200 cursor-pointer">
-              <div className="relative aspect-[2/3] overflow-hidden">
-                <img
-                  src={anime.image}
-                  alt={anime.title}
-                  loading="lazy"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-1.5 left-1.5 flex items-center gap-0.5 bg-black/70 text-yellow-400 text-[10px] px-1.5 py-0.5 rounded">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8.243 7.34l-6.38 .925l-.113 .023a1 1 0 0 0 -.44 1.684l4.622 4.499l-1.09 6.355l-.013 .11a1 1 0 0 0 1.464 .944l5.706 -3l5.693 3l.1 .046a1 1 0 0 0 1.352 -1.1l-1.091 -6.355l4.624 -4.5l.078 -.085a1 1 0 0 0 -.633 -1.62l-6.38 -.926l-2.852 -5.78a1 1 0 0 0 -1.794 0l-2.853 5.78z" />
-                  </svg>
-                  <span>{anime.rating || 'N/A'}</span>
+        {data.results.slice(0, 12).map((anime: any) => {
+          if (!anime.id) return null;
+          const slug = getSlug(anime.title);
+          return (
+            <WatchOverlay key={anime.id} id={anime.id} finder={slug} name={anime.title}>
+              <div className="group bg-[#16162a] border border-[#2d2d4a] rounded-lg overflow-hidden hover:border-purple-600 hover:-translate-y-1 transition-all duration-200 cursor-pointer">
+                <div className="relative aspect-[2/3] overflow-hidden">
+                  <img
+                    src={anime.image}
+                    alt={anime.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://placehold.co/300x450?text=No+Image';
+                    }}
+                  />
+                  <div className="absolute top-1.5 left-1.5 flex items-center gap-0.5 bg-black/70 text-yellow-400 text-[10px] px-1.5 py-0.5 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8.243 7.34l-6.38 .925l-.113 .023a1 1 0 0 0 -.44 1.684l4.622 4.499l-1.09 6.355l-.013 .11a1 1 0 0 0 1.464 .944l5.706 -3l5.693 3l.1 .046a1 1 0 0 0 1.352 -1.1l-1.091 -6.355l4.624 -4.5l.078 -.085a1 1 0 0 0 -.633 -1.62l-6.38 -.926l-2.852 -5.78a1 1 0 0 0 -1.794 0l-2.853 5.78z" />
+                    </svg>
+                    <span>{anime.rating || 'N/A'}</span>
+                  </div>
+                  <div className="absolute bottom-1.5 left-1.5 bg-purple-600/90 text-white text-[10px] px-1.5 py-0.5 rounded">
+                    {anime.type}
+                  </div>
+                  <div className="absolute top-1.5 right-1.5">
+                    <SourceBadge source="animekai" size="sm" showLabel={false} />
+                  </div>
                 </div>
-                <div className="absolute bottom-1.5 left-1.5 bg-purple-600/90 text-white text-[10px] px-1.5 py-0.5 rounded">
-                  {anime.type}
-                </div>
-
-                <div className="absolute top-1.5 right-1.5">
-                  <SourceBadge source="animekai" size="sm" showLabel={false} />
-                </div>
-                <div className="absolute bottom-1.5 right-1.5 flex gap-0.5">
-       
-                  {(anime.subCount ?? 0) > 0 && (
-                    <span className="bg-blue-600/90 text-white text-[9px] px-1 py-0.5 rounded">SUB</span>
-                  )}
-                  {(anime.dubCount ?? 0) > 0 && (
-                    <span className="bg-orange-600/90 text-white text-[9px] px-1 py-0.5 rounded">DUB</span>
-                  )}
+                <div className="p-1.5">
+                  <p className="text-xs font-medium text-white truncate">{anime.title}</p>
+                  <p className="text-[10px] text-gray-500 truncate mt-0.5">{anime.releaseDate?.slice(0, 4) || ''}</p>
                 </div>
               </div>
-              <div className="p-1.5">
-                <p className="text-xs font-medium text-white truncate">{anime.title}</p>
-                <p className="text-[10px] text-gray-500 truncate mt-0.5">{anime.japaneseTitle || anime.releaseDate?.slice(0, 4) || ''}</p>
-              </div>
-            </div>
-          </WatchOverlay>
-        ))}
+            </WatchOverlay>
+          );
+        })}
       </div>
     </div>
   );

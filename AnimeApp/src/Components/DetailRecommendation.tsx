@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import WatchOverlay from "./WatchOverlay";
 import { DynamicUrl } from "../Utils/DynamicUrl";
@@ -9,6 +10,7 @@ interface RecommendationAnime {
   image: string;
   type?: string;
   rating?: number | string;
+  source: "animekai" | "animeunity" | "anipub";
 }
 
 function DetailRecommendation({ currentAnimeId }: { currentAnimeId: string }) {
@@ -17,14 +19,80 @@ function DetailRecommendation({ currentAnimeId }: { currentAnimeId: string }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchRandomAnime = async () => {
+    const fetchRecommendations = async () => {
       setLoading(true);
+      const recs: RecommendationAnime[] = [];
+      const seenIds = new Set<string>();
+      
       try {
-        let recs: RecommendationAnime[] = [];
+        const randomPage = Math.floor(Math.random() * 20) + 1;
+        const response = await fetch(`${DynamicUrl()}/mikesenpai/api/animekai/top-rated?page=${randomPage}`);
         
-  
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.results && data.results.length > 0) {
+            const filtered = data.results
+              .filter((anime: any) => String(anime.id) !== currentAnimeId)
+              .slice(0, 8)
+              .map((anime: any) => {
+                seenIds.add(String(anime.id));
+                return {
+                  id: String(anime.id),
+                  title: anime.title,
+                  image: anime.image,
+                  type: anime.type,
+                  rating: anime.rating,
+                  source: "animekai" as const
+                };
+              });
+            
+            recs.push(...filtered);
+          }
+        }
+      } catch (err) {
+        console.log("Error fetching from AnimeKai:", err);
+      }
+      
+      if (recs.length < 10) {
+        const needed = 10 - recs.length;
+        
         try {
-          const randomPage = Math.floor(Math.random() * 100) + 1;
+          const randomPage = Math.floor(Math.random() * 10) + 1;
+          const response = await fetch(`${DynamicUrl()}/mikesenpai/api/unified/search/a?page=${randomPage}`);
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            if (data.results && data.results.length > 0) {
+              const filtered = data.results
+                .filter((anime: any) => !seenIds.has(String(anime.Id)) && String(anime.Id) !== currentAnimeId)
+                .slice(0, needed)
+                .map((anime: any) => {
+                  seenIds.add(String(anime.Id));
+                  return {
+                    id: String(anime.Id),
+                    title: anime.Name,
+                    image: anime.Image,
+                    type: anime.type,
+                    rating: anime.rating,
+                    source: "animeunity" as const
+                  };
+                });
+              
+              recs.push(...filtered);
+            }
+          }
+        } catch (err) {
+          console.log("Error fetching from AnimeUnity:", err);
+        }
+      }
+      
+      if (recs.length < 10) {
+        const needed = 10 - recs.length;
+        
+        try {
+          const randomPage = Math.floor(Math.random() * 50) + 1;
           const response = await fetch(`${DynamicUrl()}/mikesenpai/api/topRated/${randomPage}`);
           
           if (response.ok) {
@@ -32,87 +100,31 @@ function DetailRecommendation({ currentAnimeId }: { currentAnimeId: string }) {
             
             if (data.AniData && data.AniData.length > 0) {
               const filtered = data.AniData
-                .filter((anime: any) => String(anime._id) !== currentAnimeId)
-                .slice(0, 10)
+                .filter((anime: any) => !seenIds.has(String(anime._id)) && String(anime._id) !== currentAnimeId)
+                .slice(0, needed)
                 .map((anime: any) => ({
                   id: String(anime._id),
                   title: anime.Name,
                   image: anime.ImagePath,
                   type: anime.type,
-                  rating: anime.MALScore
+                  rating: anime.MALScore,
+                  source: "anipub" as const
                 }));
               
-              recs = filtered;
-              console.log(`Found ${recs.length} random anime from local backend (Anipub)`);
+              recs.push(...filtered);
             }
           }
         } catch (err) {
-          console.log("Error fetching from local backend:", err);
+          console.log("Error fetching from Anipub:", err);
         }
- 
-        if (recs.length < 10) {
-          const needed = 10 - recs.length;
-          console.log(`Need ${needed} more from AnimeKai`);
-          
-          try {
-            const response = await fetch(`${DynamicUrl()}/mikesenpai/api/animekai/top-rated?page=1`);
-            const data = await response.json();
-
-            if (data.results && data.results.length > 0) {
-              const filtered = data.results
-                .filter((anime: any) => String(anime.id) !== currentAnimeId && !recs.some(r => r.id === String(anime.id)))
-                .slice(0, needed)
-                .map((anime: any) => ({
-                  id: String(anime.id),
-                  title: anime.title,
-                  image: anime.image,
-                  type: anime.type,
-                  rating: anime.rating
-                }));
-              
-              recs = [...recs, ...filtered];
-              console.log(`Added ${filtered.length} from AnimeKai, total now ${recs.length}`);
-            }
-          } catch (err) {
-            console.log("Error fetching from AnimeKai:", err);
-          }
-        }
-        
-      
-        if (recs.length === 0) {
-          console.log("Fallback to random search");
-          const randomLetters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
-          const randomLetter = randomLetters[Math.floor(Math.random() * randomLetters.length)];
-          
-          const response = await fetch(`${DynamicUrl()}/mikesenpai/api/animekai/search/${randomLetter}?page=1`);
-          const data = await response.json();
-          
-         
-          if (data.results && data.results.length > 0) {
-            recs = data.results
-              .filter((anime: any) => String(anime.id) !== currentAnimeId)
-              .slice(0, 10)
-              .map((anime: any) => ({
-                id: String(anime.id),
-                title: anime.title,
-                image: anime.image,
-                type: anime.type,
-                rating: anime.rating
-              }));
-          }
-        }
-        
-        setRecommendations(recs.slice(0, 10));
-      } catch (error) {
-        console.error("Error fetching recommendations:", error);
-        setRecommendations([]);
-      } finally {
-        setLoading(false);
       }
+      
+      setRecommendations(recs.slice(0, 10));
+      setLoading(false);
     };
     
     if (currentAnimeId) {
-      fetchRandomAnime();
+      fetchRecommendations();
     }
   }, [currentAnimeId]);
   
@@ -124,6 +136,12 @@ function DetailRecommendation({ currentAnimeId }: { currentAnimeId: string }) {
         behavior: 'smooth'
       });
     }
+  };
+  
+  const getSourceBadge = (source: string): "animekai" | "animeunity" | "anipub" => {
+    if (source === "animekai") return "animekai";
+    if (source === "animeunity") return "animeunity";
+    return "anipub";
   };
   
   if (loading) {
@@ -183,53 +201,48 @@ function DetailRecommendation({ currentAnimeId }: { currentAnimeId: string }) {
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {recommendations.map((anime) => (
-      
-            <div className="flex-shrink-0 w-32 group cursor-pointer">
-              <div className="relative overflow-hidden rounded-xl transition-all duration-300 group-hover:scale-105">
-                <div className="aspect-[2/3] overflow-hidden rounded-xl">
-                    <WatchOverlay
-            key={anime.id}
-            id={anime.id}
-            finder={anime.title}
-            name={anime.title}
-          >
+          <div key={anime.id} className="flex-shrink-0 w-32 group cursor-pointer">
+            <div className="relative overflow-hidden rounded-xl transition-all duration-300 group-hover:scale-105">
+              <div className="aspect-[2/3] overflow-hidden rounded-xl">
+                <WatchOverlay id={anime.id} finder={anime.title} name={anime.title}>
                   <img
                     src={anime.image}
                     alt={anime.title}
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://placehold.co/300x450?text=No+Image';
+                    }}
                   />
-                        </WatchOverlay>
+                </WatchOverlay>
+              </div>
+              
+              <div className="absolute top-1.5 right-1.5 z-10">
+                <SourceBadge source={getSourceBadge(anime.source)} size="sm" showLabel={false} />
+              </div>
+              
+              {anime.rating && Number(anime.rating) > 0 && (
+                <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <svg className="w-2.5 h-2.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                  <span className="text-[9px] text-white">{anime.rating}</span>
                 </div>
-                {anime.rating && Number(anime.rating) > 0 && (
-                    <>
-                     <div className="absolute top-1.5 right-1.5 z-10">
-                <SourceBadge source="anipub" size="sm" showLabel={false} />
-              </div>
-                  <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <svg className="w-2.5 h-2.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
-                    <span className="text-[9px] text-white">{anime.rating}</span>
-                  </div>
-                  </>
-                  
-                )}
-                {anime.type && (
-                  <div className="absolute top-2 left-2 bg-purple-600/90 backdrop-blur-sm px-2 py-0.5 rounded-lg">
-                    <span className="text-[9px] font-bold text-white">{anime.type}</span>
-                  </div>
-                )}
-              </div>
-                     
-             
-              <div className="mt-2">
-                <h3 className="text-xs font-medium text-white truncate group-hover:text-purple-400 transition">
-                  {anime.title}
-                </h3>
-              </div>
+              )}
+              
+              {anime.type && (
+                <div className="absolute top-2 left-2 bg-purple-600/90 backdrop-blur-sm px-2 py-0.5 rounded-lg">
+                  <span className="text-[9px] font-bold text-white">{anime.type}</span>
+                </div>
+              )}
             </div>
-    
+         
+            <div className="mt-2">
+              <h3 className="text-xs font-medium text-white truncate group-hover:text-purple-400 transition">
+                {anime.title}
+              </h3>
+            </div>
+          </div>
         ))}
       </div>
     </div>

@@ -1,4 +1,4 @@
-
+// frontend/src/Types/Interface.ts - Make source optional
 export interface AnimeInfo {
     _id: string,
     Name: string,
@@ -17,16 +17,13 @@ export interface AnimeInfo {
     epCount: number,
 }
 
-
-
 export type AnimeSearch = {
     Name?: string;
     Id?: number | string;
     Image?: string;
-    source: "anipub" | "animekai"
+    source?: "anipub" | "animekai" | "animeunity"
     finder?: string;
 }
-
 
 export type AniData = {
     _id: number;
@@ -44,16 +41,17 @@ export type AniData = {
     AniData: AniData[];
   }
 
-  export type  WatchOverlayProps = {
-    children: React.ReactNode;
-    onClick?: () => void;
-    id?: number | string | undefined;
-    finder?: string | undefined;
-    name?: string | undefined;
-  }
+export type WatchOverlayProps = {
+  children: React.ReactNode;
+  onClick?: () => void;
+  id?: number | string | undefined;
+  finder?: string | undefined;
+  name?: string | undefined;
+  source?: "anipub" | "animekai" | "animeunity" | "animesaturn" | "hianime";
+}
 
-
-  export type AnimeDetailProps = {
+export type AnimeDetailProps = {
+  title?: string;
     _id?: number | string;
     Name?: string;
     ImagePath?: string;
@@ -71,33 +69,24 @@ export type AniData = {
     Producers?: string;
     DescripTion?: string;
     epCount?: number | string;
-  
-    
+}
 
-
-
-  }
-
-
-  export type BingeWorth = {
+export type BingeWorth = {
     bingeList: AnimeDetailProps[];
     isLoading: boolean;
     error: string | null;
-  }
+}
 
-
-  export interface AnimeDetail {
+export interface AnimeDetail {
     local: AnimeDetailProps;
-  }
-  
+}
 
-
-  export type Episode = {
+export type Episode = {
     link: string; 
     image: string;
-  };
-  
-  export type AnimeStreamingProps = {
+};
+
+export type AnimeStreamingProps = {
     _id?: number | string;
     name?: string;
     link?: string;
@@ -105,18 +94,17 @@ export type AniData = {
     type?: string;
     ep?: Episode[]; 
     finder?: string;
-  };
-  
-  export type AnimeStream = {
+};
+
+export type AnimeStream = {
     local: AnimeStreamingProps;
-  };
-  export type StreamProps = {
+};
+
+export type StreamProps = {
     currentVideo?: string | null;
-  }
+}
 
-
-  export type AnimeGenreProps = {
- 
+export type AnimeGenreProps = {
     _id: number | string;
     Name: string;
     ImagePath: string;
@@ -124,9 +112,9 @@ export type AniData = {
     RatingsNum: string;
     DescripTion: string;
     finder: string;
-  }
+}
 
-  export type AnimeGenre = {
+export type AnimeGenre = {
     currentPage?: number | string;
     wholePage?: AnimeGenreProps[];
-  }
+}

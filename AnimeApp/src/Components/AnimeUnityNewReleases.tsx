@@ -1,14 +1,41 @@
-// frontend/src/Components/AnimeKaiTopRated.tsx
-import SourceBadge from "./SourceBadge";
-import { useState } from "react";
-import { useAnimeKaiTopRated } from "../Hooks/useAnimeKaiTopRated";
+// frontend/src/Components/AnimeUnityNewReleases.tsx
+import { useState, useEffect } from "react";
+import { DynamicUrl } from "../Utils/DynamicUrl";
 import WatchOverlay from "./WatchOverlay";
+import SourceBadge from "./SourceBadge";
 
-function AnimeKaiTopRated() {
+interface AnimeItem {
+  title: string;
+  image: string;
+  cover: string;
+  rating: number;
+  type: string;
+  releaseDate: string;
+  description: string;
+}
+
+function AnimeUnityNewReleases() {
   const [page, setPage] = useState(1);
-  const { data, loading, error } = useAnimeKaiTopRated(page);
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getSlug = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  useEffect(() => {
+    const fetchNewReleases = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`${DynamicUrl()}/mikesenpai/api/animekai/new-releases?page=${page}`);
+        if (!response.ok) throw new Error("Failed to fetch");
+        const result = await response.json();
+        setData(result);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNewReleases();
+  }, [page]);
 
   if (loading) {
     return (
@@ -31,22 +58,28 @@ function AnimeKaiTopRated() {
   if (error) {
     return (
       <div className="p-4 text-center">
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-          <p className="text-red-400 text-sm">Top Rated temporarily unavailable</p>
-          <button onClick={() => setPage(1)} className="mt-2 text-purple-400 text-sm hover:text-purple-300">
-            Retry
-          </button>
-        </div>
+        <p className="text-red-400 text-sm">{error}</p>
+        <button onClick={() => setPage(1)} className="mt-2 text-purple-400 text-sm hover:text-purple-300">
+          Retry
+        </button>
       </div>
     );
   }
 
   if (!data?.results?.length) return null;
 
+  const getSlug = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-white">Top Rated Anime</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-bold text-white">New Releases</h2>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-[10px] text-green-400">Discover</span>
+          </span>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
@@ -55,7 +88,7 @@ function AnimeKaiTopRated() {
           >
             ‹
           </button>
-          <span className="text-xs text-gray-400">{page} / {data.totalPages || 1}</span>
+          <span className="text-xs text-gray-400">{page} / {data.totalPages}</span>
           <button
             onClick={() => setPage(p => p + 1)}
             disabled={!data.hasNextPage}
@@ -67,11 +100,10 @@ function AnimeKaiTopRated() {
       </div>
 
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
-        {data.results.slice(0, 12).map((anime: any) => {
-          if (!anime.id) return null;
+        {data.results.slice(0, 12).map((anime: AnimeItem) => {
           const slug = getSlug(anime.title);
           return (
-            <WatchOverlay key={anime.id} id={anime.id} finder={slug} name={anime.title}>
+            <WatchOverlay key={anime.title} id={anime.title} finder={slug} name={anime.title}>
               <div className="group bg-[#16162a] border border-[#2d2d4a] rounded-lg overflow-hidden hover:border-purple-600 hover:-translate-y-1 transition-all duration-200 cursor-pointer">
                 <div className="relative aspect-[2/3] overflow-hidden">
                   <img
@@ -79,9 +111,6 @@ function AnimeKaiTopRated() {
                     alt={anime.title}
                     loading="lazy"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://placehold.co/300x450?text=No+Image';
-                    }}
                   />
                   <div className="absolute top-1.5 left-1.5 flex items-center gap-0.5 bg-black/70 text-yellow-400 text-[10px] px-1.5 py-0.5 rounded">
                     <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="currentColor">
@@ -92,7 +121,7 @@ function AnimeKaiTopRated() {
                   <div className="absolute bottom-1.5 left-1.5 bg-purple-600/90 text-white text-[10px] px-1.5 py-0.5 rounded">
                     {anime.type}
                   </div>
-                  <div className="absolute top-1.5 right-1.5">
+                  <div className="absolute bottom-2 right-2">
                     <SourceBadge source="animekai" size="sm" showLabel={false} />
                   </div>
                 </div>
@@ -109,4 +138,4 @@ function AnimeKaiTopRated() {
   );
 }
 
-export default AnimeKaiTopRated;
+export default AnimeUnityNewReleases;

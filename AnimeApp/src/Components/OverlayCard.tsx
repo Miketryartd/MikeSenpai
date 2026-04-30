@@ -92,9 +92,13 @@ function OverlayCard() {
                
               </p>
               <ol className=" text-xs text-center">
-                <li>4/30/2026</li>
-                <li>Anime search</li>
+                <li>5/1/2026</li>
+                <li>Anime sources (BEST)</li>
                 <li>Anime caching</li>
+                <li>Less lagging between render</li>
+                <li>(Testing stages on anime sources (might fail))</li>
+                <li>Removed old source </li>
+                <li>UI Change</li>
                 <li>History (Bookmark not functional yet)</li>
               </ol>
             </div>

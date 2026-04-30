@@ -1,9 +1,10 @@
+// frontend/src/Hooks/useAnimeStream.ts
 import { useEffect, useState } from "react";
-import { getStreamLinks } from "../Services/streamLink";
+import { getMultiStreamLinks } from "../Services/multiStreamLink";
 import type { AnimeStream } from "../Types/Interface";
 
 export const useAnimeStream = (id: number | string | undefined) => {
-  const [result, setResult] = useState<AnimeStream | null>(null);
+  const [result, setResult] = useState<(AnimeStream & { source?: string }) | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,11 +14,12 @@ export const useAnimeStream = (id: number | string | undefined) => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const data = await getMultiStreamLinks(id);
 
-        const data = await getStreamLinks(id);
-
-        if (isMounted) {
+        if (isMounted && data) {
           setResult(data);
+        } else if (isMounted) {
+          setResult(null);
         }
       } catch (err: any) {
         if (isMounted) {
