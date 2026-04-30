@@ -113,7 +113,7 @@ function Nav() {
               </form>
 
               <a
-                href="https://github.com/Miketryartd/MikeSenpai.com"
+                href="https://github.com/Miketryartd"
                 className="cursor-pointer border border-purple-700 text-purple-400 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-lg transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
