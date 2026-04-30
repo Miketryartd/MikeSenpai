@@ -46,6 +46,7 @@ export type AniData = {
  
 
   export type AnimeDetailProps = {
+    title?: string;
     _id?: number | string;
     Name?: string;
     ImagePath?: string;
