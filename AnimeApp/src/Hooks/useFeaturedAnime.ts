@@ -1,7 +1,7 @@
 // frontend/src/Hooks/useFeaturedAnime.ts
 import { useState, useCallback, useRef } from "react";
 import type { AnimeDetailProps } from "../Types/Interface";
-import { DynamicUrl } from "../Utils/DynamicUrl";
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 
 interface AnimeKaiResult {
   id: string;
@@ -48,13 +48,7 @@ export const useFeaturedAnime = () => {
     loadedPages.current.add(randomPage);
     
     try {
-      const response = await fetch(`${DynamicUrl()}/mikesenpai/api/animekai/top-rated?page=${randomPage}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const data = await fetchWithNgrok(`/mikesenpai/api/animekai/top-rated?page=${randomPage}`);
       
       if (!data.results || data.results.length === 0) {
         return [];

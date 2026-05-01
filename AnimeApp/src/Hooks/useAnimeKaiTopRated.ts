@@ -1,6 +1,6 @@
 // frontend/src/Hooks/useAnimeKaiTopRated.ts
 import { useState, useEffect } from "react";
-import { DynamicUrl } from "../Utils/DynamicUrl";
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 
 export const useAnimeKaiTopRated = (page: number = 1) => {
   const [data, setData] = useState<any>(null);
@@ -11,12 +11,10 @@ export const useAnimeKaiTopRated = (page: number = 1) => {
     const fetchTopRated = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${DynamicUrl()}/mikesenpai/api/animekai/top-rated?page=${page}`);
-        const result = await response.json();
+        const result = await fetchWithNgrok(`/mikesenpai/api/animekai/top-rated?page=${page}`);
         if (result.error) {
           setError(result.error);
         } else {
-          // Ensure each result has an animeKaiId for mapping
           if (result.results) {
             result.results = result.results.map((anime: any) => ({
               ...anime,

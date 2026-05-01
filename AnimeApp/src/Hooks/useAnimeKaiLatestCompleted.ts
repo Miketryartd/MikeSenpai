@@ -1,6 +1,6 @@
-
+// frontend/src/Hooks/useAnimeKaiLatestCompleted.ts
 import { useState, useEffect } from "react";
-import { DynamicUrl } from "../Utils/DynamicUrl";
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 import type { AnimeKaiNewReleasesResponse } from "../Types/AnimeKaiTypes";
 
 export const useAnimeKaiLatestCompleted = (page: number = 1) => {
@@ -12,8 +12,7 @@ export const useAnimeKaiLatestCompleted = (page: number = 1) => {
     const fetchLatestCompleted = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${DynamicUrl()}/mikesenpai/api/animekai/latest-completed?page=${page}`);
-        const result = await response.json();
+        const result = await fetchWithNgrok(`/mikesenpai/api/animekai/latest-completed?page=${page}`);
         if (result.error) {
           setError(result.error);
         } else {

@@ -1,6 +1,8 @@
+// frontend/src/Hooks/useTopRated.ts
 import { useState, useEffect } from "react";
-import { DynamicUrl } from "../Utils/DynamicUrl";
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 import type { AniData } from "../Types/Interface";
+
 const TOTAL_PAGES = 354; 
 
 export function useTopRated(page: number = 1) {
@@ -16,17 +18,12 @@ export function useTopRated(page: number = 1) {
       setError(null);
 
       try {
-        const res = await fetch(`${DynamicUrl()}/mikesenpai/api/topRated/${page}`, {
-          signal: controller.signal,
-        });
-
-        const data = await res.json();
+        const data = await fetchWithNgrok(`/mikesenpai/api/topRated/${page}`);
         setResults(data.AniData);
-        setLoading(false);
-
       } catch (err: any) {
         if (err.name === "AbortError") return;
         setError("Failed to load");
+      } finally {
         setLoading(false);
       }
     };
@@ -34,7 +31,6 @@ export function useTopRated(page: number = 1) {
     fetchTopRated();
     return () => controller.abort();
   }, [page]);
-
 
   return { results, loading, error, totalPages: TOTAL_PAGES };
 }

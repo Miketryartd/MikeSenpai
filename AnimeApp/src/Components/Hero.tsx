@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { DynamicUrl } from "../Utils/DynamicUrl";
+import {  fetchWithNgrok } from "../Utils/DynamicUrl";
 
 interface HeroAnime {
   title: string;
@@ -17,19 +17,12 @@ function Hero() {
   const [featured, setFeatured] = useState<HeroAnime | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     const fetchHeroData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${DynamicUrl()}/mikesenpai/api/animekai/top-rated?page=1`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
+        const data = await fetchWithNgrok(`/mikesenpai/api/animekai/top-rated?page=1`);
         
         if (data.results && data.results.length > 0) {
           const randomIndex = Math.floor(Math.random() * Math.min(10, data.results.length));

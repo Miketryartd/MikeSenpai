@@ -1,6 +1,6 @@
 // frontend/src/Hooks/useAnimeKaiNewReleases.ts
 import { useState, useEffect } from "react";
-import { DynamicUrl } from "../Utils/DynamicUrl";
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 
 export const useAnimeKaiNewReleases = (page: number = 1) => {
   const [data, setData] = useState<any>(null);
@@ -11,8 +11,7 @@ export const useAnimeKaiNewReleases = (page: number = 1) => {
     const fetchNewReleases = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${DynamicUrl()}/mikesenpai/api/animekai/new-releases?page=${page}`);
-        const result = await response.json();
+        const result = await fetchWithNgrok(`/mikesenpai/api/animekai/new-releases?page=${page}`);
         if (result.error) {
           setError(result.error);
         } else {

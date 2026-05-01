@@ -1,7 +1,6 @@
-
 import { useState, useEffect, useRef } from "react";
 import WatchOverlay from "./WatchOverlay";
-import { DynamicUrl } from "../Utils/DynamicUrl";
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 import SourceBadge from "./SourceBadge";
 
 interface RecommendationAnime {
@@ -26,29 +25,25 @@ function DetailRecommendation({ currentAnimeId }: { currentAnimeId: string }) {
       
       try {
         const randomPage = Math.floor(Math.random() * 20) + 1;
-        const response = await fetch(`${DynamicUrl()}/mikesenpai/api/animekai/top-rated?page=${randomPage}`);
+        const data = await fetchWithNgrok(`/mikesenpai/api/animekai/top-rated?page=${randomPage}`);
         
-        if (response.ok) {
-          const data = await response.json();
+        if (data.results && data.results.length > 0) {
+          const filtered = data.results
+            .filter((anime: any) => String(anime.id) !== currentAnimeId)
+            .slice(0, 8)
+            .map((anime: any) => {
+              seenIds.add(String(anime.id));
+              return {
+                id: String(anime.id),
+                title: anime.title,
+                image: anime.image,
+                type: anime.type,
+                rating: anime.rating,
+                source: "animekai" as const
+              };
+            });
           
-          if (data.results && data.results.length > 0) {
-            const filtered = data.results
-              .filter((anime: any) => String(anime.id) !== currentAnimeId)
-              .slice(0, 8)
-              .map((anime: any) => {
-                seenIds.add(String(anime.id));
-                return {
-                  id: String(anime.id),
-                  title: anime.title,
-                  image: anime.image,
-                  type: anime.type,
-                  rating: anime.rating,
-                  source: "animekai" as const
-                };
-              });
-            
-            recs.push(...filtered);
-          }
+          recs.push(...filtered);
         }
       } catch (err) {
         console.log("Error fetching from AnimeKai:", err);
@@ -59,29 +54,25 @@ function DetailRecommendation({ currentAnimeId }: { currentAnimeId: string }) {
         
         try {
           const randomPage = Math.floor(Math.random() * 10) + 1;
-          const response = await fetch(`${DynamicUrl()}/mikesenpai/api/unified/search/a?page=${randomPage}`);
+          const data = await fetchWithNgrok(`/mikesenpai/api/unified/search/a?page=${randomPage}`);
           
-          if (response.ok) {
-            const data = await response.json();
+          if (data.results && data.results.length > 0) {
+            const filtered = data.results
+              .filter((anime: any) => !seenIds.has(String(anime.Id)) && String(anime.Id) !== currentAnimeId)
+              .slice(0, needed)
+              .map((anime: any) => {
+                seenIds.add(String(anime.Id));
+                return {
+                  id: String(anime.Id),
+                  title: anime.Name,
+                  image: anime.Image,
+                  type: anime.type,
+                  rating: anime.rating,
+                  source: "animeunity" as const
+                };
+              });
             
-            if (data.results && data.results.length > 0) {
-              const filtered = data.results
-                .filter((anime: any) => !seenIds.has(String(anime.Id)) && String(anime.Id) !== currentAnimeId)
-                .slice(0, needed)
-                .map((anime: any) => {
-                  seenIds.add(String(anime.Id));
-                  return {
-                    id: String(anime.Id),
-                    title: anime.Name,
-                    image: anime.Image,
-                    type: anime.type,
-                    rating: anime.rating,
-                    source: "animeunity" as const
-                  };
-                });
-              
-              recs.push(...filtered);
-            }
+            recs.push(...filtered);
           }
         } catch (err) {
           console.log("Error fetching from AnimeUnity:", err);
@@ -93,26 +84,22 @@ function DetailRecommendation({ currentAnimeId }: { currentAnimeId: string }) {
         
         try {
           const randomPage = Math.floor(Math.random() * 50) + 1;
-          const response = await fetch(`${DynamicUrl()}/mikesenpai/api/topRated/${randomPage}`);
+          const data = await fetchWithNgrok(`/mikesenpai/api/topRated/${randomPage}`);
           
-          if (response.ok) {
-            const data = await response.json();
+          if (data.AniData && data.AniData.length > 0) {
+            const filtered = data.AniData
+              .filter((anime: any) => !seenIds.has(String(anime._id)) && String(anime._id) !== currentAnimeId)
+              .slice(0, needed)
+              .map((anime: any) => ({
+                id: String(anime._id),
+                title: anime.Name,
+                image: anime.ImagePath,
+                type: anime.type,
+                rating: anime.MALScore,
+                source: "anipub" as const
+              }));
             
-            if (data.AniData && data.AniData.length > 0) {
-              const filtered = data.AniData
-                .filter((anime: any) => !seenIds.has(String(anime._id)) && String(anime._id) !== currentAnimeId)
-                .slice(0, needed)
-                .map((anime: any) => ({
-                  id: String(anime._id),
-                  title: anime.Name,
-                  image: anime.ImagePath,
-                  type: anime.type,
-                  rating: anime.MALScore,
-                  source: "anipub" as const
-                }));
-              
-              recs.push(...filtered);
-            }
+            recs.push(...filtered);
           }
         } catch (err) {
           console.log("Error fetching from Anipub:", err);

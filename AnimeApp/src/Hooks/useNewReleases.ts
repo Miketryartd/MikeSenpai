@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchNewReleases } from "../Services/fetchNewReleases";
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 
 interface NewReleaseAnime {
   id: string;
@@ -14,22 +14,23 @@ interface NewReleaseAnime {
 }
 
 export const useNewReleases = (page: number = 1) => {
-  const [results, setResults]         = useState<NewReleaseAnime[]>([]);
-  const [loading, setLoading]         = useState<boolean>(true);
-  const [error, setError]             = useState<string | null>(null);
+  const [results, setResults] = useState<NewReleaseAnime[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
-  const [totalPages, setTotalPages]   = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchNewReleases(page);
-        setResults(data.results);
-        setHasNextPage(data.hasNextPage);
-        setTotalPages(data.totalPages);
-      } catch {
+        const data = await fetchWithNgrok(`/mikesenpai/api/new-releases?page=${page}`);
+        setResults(data.results || []);
+        setHasNextPage(data.hasNextPage || false);
+        setTotalPages(data.totalPages || 0);
+      } catch (err) {
+        console.error("Failed to load new releases:", err);
         setError("Failed to load new releases");
       } finally {
         setLoading(false);
@@ -37,7 +38,7 @@ export const useNewReleases = (page: number = 1) => {
     };
 
     load();
-  }, [page]); 
+  }, [page]);
 
   return { results, loading, error, hasNextPage, totalPages };
 };
