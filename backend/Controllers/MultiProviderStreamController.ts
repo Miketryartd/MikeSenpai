@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import { ANIME } from "@consumet/extensions";
 import { createCache } from "../Utilities/cache.js";
-
+import { fetchViaCloudflareProxy } from "../Utilities/worker.js";
 const cache = createCache<any>();
 const animeunity = new ANIME.AnimeUnity();
 
@@ -21,75 +21,86 @@ const getTitle = (title: any): string => {
   return "Unknown";
 };
 
-const extractAnimeNameFromKaiId = (kaiId: string): string => {
-  let cleaned = kaiId.replace(/-[a-z0-9]*\d[a-z0-9]*$/i, '');
-  cleaned = cleaned.replace(/-/g, ' ');
+// backend/Controllers/MultiProviderStreamController.ts
+// Replace the fetchViaProxy function with this:
+
+const fetchViaProxy = async (url: string): Promise<any> => {
+  // Try Cloudflare Worker FIRST (your own proxy)
+  const cloudflareWorkerUrl = process.env.CLOUDFLARE_WORKER_URL || 'https://animeunityproxy.mikeleano26.workers.dev';
+  
+  try {
+    const proxyUrl = `${cloudflareWorkerUrl}?url=${encodeURIComponent(url)}`;
+    console.log(`Trying Cloudflare Worker proxy: ${proxyUrl}`);
+    const response = await fetch(proxyUrl);
+    if (response.ok) {
+      const data = await response.json();
+      console.log(`Cloudflare Worker proxy success`);
+      return data;
+    }
+  } catch (err) {
+    console.log(`Cloudflare Worker proxy failed:`, err);
+  }
+  
+  // Fallback to other proxies if Cloudflare fails
+  const proxyServers = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://cors-anywhere.herokuapp.com/${url}`,
+    `https://proxy.cors.sh/${url}`,
+  ];
+  
+  for (const proxyUrl of proxyServers) {
+    try {
+      console.log(`Trying fallback proxy: ${proxyUrl.substring(0, 80)}...`);
+      const response = await fetch(proxyUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/json',
+        }
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (err) {}
+  }
+  return null;
+};
+const extractAnimeTitle = (kaiId: string): string => {
+  let cleaned = kaiId
+    .replace(/-\d+[a-z]*$/, '')
+    .replace(/-[a-z0-9]{4,}$/, '')
+    .replace(/-/g, ' ');
+  
+  cleaned = cleaned.replace(/\s+(season|part|cour|arc)\s+\d+$/i, '');
+  
   return cleaned.trim();
 };
 
-const normalizeTitle = (title: string): string => {
-  return title.toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-};
-
-const resolveAnimeUnityId = async (kaiId: string): Promise<string | null> => {
-  const animeName = extractAnimeNameFromKaiId(kaiId);
-  console.log(`Resolving AnimeUnity ID — extracted name: "${animeName}" from "${kaiId}"`);
-
-  const words = animeName.split(' ');
-  const queriesToTry: string[] = [];
-  for (let i = words.length; i >= 2; i--) {
-    queriesToTry.push(words.slice(0, i).join(' '));
-  }
-
-  for (const query of queriesToTry) {
-    console.log(`Searching AnimeUnity for: "${query}"`);
+const searchAnimeUnity = async (title: string): Promise<any> => {
+  for (let i = 0; i < 3; i++) {
     try {
-      const searchResults = await animeunity.search(query);
-      if (!searchResults.results || searchResults.results.length === 0) continue;
-
-      const normalizedSearch = normalizeTitle(query);
-      let bestMatch = null;
-      let bestScore = 0;
-
-      for (const result of searchResults.results) {
-        const resultTitle = getTitle(result.title);
-        const normalizedResult = normalizeTitle(resultTitle);
-
-        let score = 0;
-        if (normalizedResult === normalizedSearch) score = 100;
-        else if (normalizedResult.includes(normalizedSearch) || normalizedSearch.includes(normalizedResult)) score = 75;
-
-        for (const word of normalizedSearch.split(' ')) {
-          if (word.length > 2 && normalizedResult.includes(word)) score += 10;
-        }
-
-        if (score > bestScore) {
-          bestScore = score;
-          bestMatch = result;
+      const result = await animeunity.search(title);
+      if (result.results && result.results.length > 0) {
+        return result;
+      }
+    } catch (err: any) {
+      if (err.message.includes('405') || err.message.includes('403')) {
+        const proxyResult = await fetchViaProxy(`https://animeunity.to/api/search?q=${encodeURIComponent(title)}`);
+        if (proxyResult && proxyResult.results) {
+          return proxyResult;
         }
       }
-
-      if (bestMatch && bestScore >= 20) {
-        console.log(`Best AnimeUnity match: "${getTitle(bestMatch.title)}" (id: ${bestMatch.id}) with score ${bestScore} using query "${query}"`);
-        return bestMatch.id;
-      }
-    } catch (err) {
-      console.log(`Search failed for query "${query}":`, err);
+      if (i < 2) await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
-
-  console.log(`No AnimeUnity results for: "${animeName}"`);
   return null;
 };
 
 export const getMultiProviderStream = async (req: Request, res: Response) => {
   try {
     const idParam = req.params.id;
-    const animeId = getStringParam(idParam);
+    let animeId = getStringParam(idParam);
 
-    console.log(`MultiProviderStream called with idParam: ${animeId}`);
+    console.log(`MultiProviderStream called with: ${animeId}`);
 
     if (!animeId) {
       return res.status(400).json({ error: "Missing id" });
@@ -98,56 +109,87 @@ export const getMultiProviderStream = async (req: Request, res: Response) => {
     const key = `multi-stream-${animeId}`;
     const cached = cache.get(key);
     if (cached) {
-      console.log("Cache hit:", key);
       return res.status(200).json(cached);
     }
 
-    const isAnimeUnityId = /^\d+(-[a-z-]+)?$/.test(animeId);
-    let resolvedId = animeId;
+    let data = null;
+    let resolvedId = null;
+    
+    const isNumeric = /^\d+$/.test(animeId);
+    const isAnimeUnityFormat = /^\d+-[a-z-]+$/.test(animeId);
 
-    if (!isAnimeUnityId) {
-      console.log(`"${animeId}" looks like an AnimeKai ID — searching AnimeUnity...`);
-      try {
-        const found = await resolveAnimeUnityId(animeId);
-        if (!found) {
-          return res.status(404).json({ error: `Could not find AnimeUnity match for: ${animeId}` });
-        }
-        resolvedId = found;
-        console.log(`Resolved AnimeUnity ID: ${resolvedId}`);
-      } catch (err) {
-        console.log("AnimeUnity search/resolve failed:", err);
-        return res.status(404).json({ error: `Failed to resolve AnimeUnity ID for: ${animeId}` });
+    if (isNumeric || isAnimeUnityFormat) {
+      resolvedId = isAnimeUnityFormat ? animeId.split('-')[0] : animeId;
+      console.log(`Direct AnimeUnity ID: ${resolvedId}`);
+    } else {
+      const extractedTitle = extractAnimeTitle(animeId);
+      console.log(`Extracted title from "${animeId}": "${extractedTitle}"`);
+      
+      const searchResult = await searchAnimeUnity(extractedTitle);
+      
+      if (searchResult && searchResult.results && searchResult.results.length > 0) {
+        const bestMatch = searchResult.results[0];
+        resolvedId = bestMatch.id;
+        console.log(`Found AnimeUnity ID: ${resolvedId} for title: ${getTitle(bestMatch.title)}`);
+      } else {
+        console.log(`No AnimeUnity match found for: ${extractedTitle}`);
+        return res.status(404).json({ error: `Could not find anime: ${extractedTitle}` });
       }
     }
 
-    let data = null;
-
-    try {
-      console.log(`Fetching AnimeUnity info for resolved ID: ${resolvedId}`);
-      const info = await animeunity.fetchAnimeInfo(resolvedId);
-      if (info && info.episodes && info.episodes.length > 0) {
-        data = {
-          source: "animeunity",
-          local: {
-            _id: info.id,
-            name: getTitle(info.title),
-            ep: info.episodes.map((ep: any) => ({
-              link: ep.id,
-              number: ep.number,
-              title: ep.title || `Episode ${ep.number}`,
-              image: ep.image || ""
-            })),
+    for (let i = 0; i < 3; i++) {
+      try {
+        console.log(`Fetching episodes from AnimeUnity for ID: ${resolvedId}`);
+        const info = await animeunity.fetchAnimeInfo(resolvedId);
+        
+        if (info && info.episodes && info.episodes.length > 0) {
+          data = {
+            source: "animeunity",
+            local: {
+              _id: info.id,
+              name: getTitle(info.title),
+              ep: info.episodes.map((ep: any) => ({
+                link: ep.id,
+                number: ep.number,
+                title: ep.title || `Episode ${ep.number}`,
+                image: ep.image || ""
+              })),
+            }
+          };
+          console.log(`AnimeUnity returned ${info.episodes.length} episodes`);
+          break;
+        }
+      } catch (err: any) {
+        console.log(`Attempt ${i + 1} failed: ${err.message}`);
+        
+        if (err.message.includes('405') || err.message.includes('403')) {
+          console.log(`Trying proxy for AnimeUnity ID: ${resolvedId}`);
+          const proxyResult = await fetchViaProxy(`https://animeunity.to/anime/${resolvedId}`);
+          if (proxyResult && proxyResult.episodes) {
+            data = {
+              source: "animeunity",
+              local: {
+                _id: proxyResult.id,
+                name: getTitle(proxyResult.title),
+                ep: proxyResult.episodes.map((ep: any) => ({
+                  link: ep.id,
+                  number: ep.number,
+                  title: ep.title || `Episode ${ep.number}`,
+                  image: ep.image || ""
+                })),
+              }
+            };
+            console.log(`Proxy returned ${proxyResult.episodes.length} episodes`);
+            break;
           }
-        };
-        console.log(`AnimeUnity returned ${info.episodes.length} episodes`);
+        }
+        
+        if (i < 2) await new Promise(resolve => setTimeout(resolve, 1000));
       }
-    } catch (err) {
-      console.log("AnimeUnity fetchAnimeInfo failed:", err);
     }
 
     if (!data || !data.local?.ep?.length) {
-      console.log(`No episodes found for resolved ID: ${resolvedId}`);
-      return res.status(404).json({ error: `No episodes found for ID: ${animeId}` });
+      return res.status(404).json({ error: `No episodes found for: ${animeId}` });
     }
 
     cache.set(key, data);
@@ -164,7 +206,7 @@ export const getMultiProviderEpisodeSource = async (req: Request, res: Response)
     const episodeIdParam = req.params.episodeId;
     const episodeId = getStringParam(episodeIdParam);
 
-    console.log(`getMultiProviderEpisodeSource called with: ${episodeId}`);
+    console.log(`Episode source requested for: ${episodeId}`);
 
     if (!episodeId) {
       return res.status(400).json({ error: "No episode ID provided" });
@@ -172,15 +214,28 @@ export const getMultiProviderEpisodeSource = async (req: Request, res: Response)
 
     let sources = null;
 
-    try {
-      console.log(`Getting sources from AnimeUnity for: ${episodeId}`);
-      const result = await animeunity.fetchEpisodeSources(episodeId);
-      if (result.sources && result.sources.length > 0) {
-        sources = result;
-        console.log(`AnimeUnity returned ${result.sources.length} sources`);
+    for (let i = 0; i < 3; i++) {
+      try {
+        const result = await animeunity.fetchEpisodeSources(episodeId);
+        if (result.sources && result.sources.length > 0) {
+          sources = result;
+          console.log(`AnimeUnity returned ${result.sources.length} sources`);
+          break;
+        }
+      } catch (err: any) {
+        console.log(`Attempt ${i + 1} failed: ${err.message}`);
+        
+        if (err.message.includes('405') || err.message.includes('403')) {
+          const proxyResult = await fetchViaProxy(`https://animeunity.to/episode/${episodeId}`);
+          if (proxyResult && proxyResult.sources) {
+            sources = proxyResult;
+            console.log(`Proxy returned ${proxyResult.sources.length} sources`);
+            break;
+          }
+        }
+        
+        if (i < 2) await new Promise(resolve => setTimeout(resolve, 1000));
       }
-    } catch (err) {
-      console.log(`AnimeUnity episode source failed:`, err);
     }
 
     if (!sources || !sources.sources || sources.sources.length === 0) {

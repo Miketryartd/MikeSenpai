@@ -1,6 +1,6 @@
 // backend/Controllers/TestMultiProviderController.ts
 import { Request, Response } from "express";
-import { ANIME, SubOrSub } from "@consumet/extensions";
+import { ANIME } from "@consumet/extensions";
 
 const providers = {
   hianime: new ANIME.Hianime(),
@@ -11,8 +11,6 @@ const providers = {
   animesama: new ANIME.AnimeSama(),
   kickassanime: new ANIME.KickAssAnime(),
 };
-
-type ProviderName = keyof typeof providers;
 
 const getStringParam = (param: any): string => {
   if (!param) return "";
