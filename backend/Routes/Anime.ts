@@ -75,6 +75,35 @@ router.get('/api/test-anipub', async (req, res) => {
 });
 
 
+// debug test
+router.get('/api/debug/test-search', async (req, res) => {
+  try {
+    const { ANIME } = await import('@consumet/extensions');
+    const animeunity = new ANIME.AnimeUnity();
+    const query = req.query.q || 'naruto';
+    
+    console.log(`Testing search for: ${query}`);
+    
+    const result = await animeunity.search(String(query));
+    
+    res.json({
+      success: true,
+      query: query,
+      resultCount: result.results?.length || 0,
+      firstResult: result.results?.[0] || null,
+      error: null
+    });
+  } catch (error: any) {
+    console.error('Test search error:', error);
+    res.json({
+      success: false,
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
+
+
 //animekai test
 router.get('/api/animekai/test', async (req, res) => {
   try {
