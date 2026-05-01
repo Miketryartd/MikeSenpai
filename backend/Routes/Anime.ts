@@ -31,9 +31,16 @@ import {
   mapAnimeKaiToAnimeUnity,
   testSearch
 } from "../Controllers/AnimeUnityMapperController.js";
+import { pingBackend } from "../Controllers/Ping.js";
+
 
 
 const router = express.Router();
+
+
+//health ping
+
+router.get('/api/ping/health', pingBackend);
 
 //search
 router.get('/api/unified/search/:query', unifiedSearch);
