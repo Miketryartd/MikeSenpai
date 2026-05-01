@@ -80,30 +80,44 @@ function Detail() {
   const { loading, result, error } = useAnimeDetails(resolvedId || id);
   const [currentVideo, setCurrentVideo] = useState<string | null>(null);
 
-  useEffect(() => {
-    const resolveAnimeId = async () => {
-      const idToResolve = id || finder;
-      if (!idToResolve) {
-        setMappingComplete(true);
-        return;
-      }
-      
-      const isNumericId = /^\d+$/.test(String(idToResolve));
-      const isAnimeUnityFormat = /^\d+-[a-z-]+$/.test(String(idToResolve));
-      
-      if (isNumericId || isAnimeUnityFormat) {
-        setResolvedId(idToResolve);
-        setMappingComplete(true);
-        return;
-      }
-      
+ // frontend/src/Pages/Detail.tsx - Update the resolveAnimeId function
+useEffect(() => {
+  const resolveAnimeId = async () => {
+    const idToResolve = id || finder;
+    
+    if (!idToResolve) {
+      setMappingComplete(true);
+      return;
+    }
+    
+    const isNumericId = /^\d+$/.test(String(idToResolve));
+    const isAnimeUnityFormat = /^\d+-[a-z-]+$/.test(String(idToResolve));
+    const isPlainText = /^[a-z][a-z0-9-]+$/.test(String(idToResolve)) && !isNumericId && !isAnimeUnityFormat;
+    
+    if (isNumericId || isAnimeUnityFormat) {
+      console.log(`ID is already in AnimeUnity format: ${idToResolve}`);
+      setResolvedId(idToResolve);
+      setMappingComplete(true);
+      return;
+    }
+    
+    if (isPlainText) {
       setMappingLoading(true);
       try {
+        console.log(`Attempting to map AnimeKai ID: ${idToResolve}`);
         const response = await fetch(`${DynamicUrl()}/mikesenpai/api/map/animekai/${encodeURIComponent(idToResolve)}`);
-        const data = await response.json();
-        if (data.success && data.animeUnityId) {
-          setResolvedId(data.animeUnityId);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.animeUnityId) {
+            setResolvedId(data.animeUnityId);
+            console.log(`Mapped to: ${data.animeUnityId}`);
+          } else {
+            console.log(`Mapping failed, using original ID: ${idToResolve}`);
+            setResolvedId(idToResolve);
+          }
         } else {
+          console.log(`Mapping endpoint returned ${response.status}, using original ID`);
           setResolvedId(idToResolve);
         }
       } catch (err) {
@@ -113,10 +127,14 @@ function Detail() {
         setMappingLoading(false);
         setMappingComplete(true);
       }
-    };
-    resolveAnimeId();
-  }, [id, finder]);
+    } else {
+      setResolvedId(idToResolve);
+      setMappingComplete(true);
+    }
+  };
 
+  resolveAnimeId();
+}, [id, finder]);
   const handleGoBackRefresh = () => {
     navigate('/Main');
     setTimeout(() => window.location.reload(), 100);

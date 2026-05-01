@@ -96,7 +96,7 @@ function Hero() {
 
       <div className="relative z-10 flex flex-col md:flex-row items-center justify-between h-full px-6 md:px-12 lg:px-20">
         <div className="max-w-2xl text-white text-center md:text-left">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-4">
+          <div className="flex flex-wrap items-center justify-center md:justify-start mt-10 gap-2 mb-4">
             <span className="text-xs bg-purple-600 px-3 py-1 rounded-full font-semibold tracking-wide">
               FEATURED
             </span>

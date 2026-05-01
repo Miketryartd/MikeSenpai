@@ -15,6 +15,57 @@ const getTitle = (title: any): string => {
   return "Unknown";
 };
 
+const fetchViaProxy = async (url: string): Promise<any> => {
+  const proxyServers = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://cors-anywhere.herokuapp.com/${url}`,
+    `https://proxy.cors.sh/${url}`,
+  ];
+  
+  for (const proxyUrl of proxyServers) {
+    try {
+      const response = await fetch(proxyUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/json',
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      }
+    } catch (err) {}
+  }
+  return null;
+};
+
+const fetchAnimeInfoWithFallback = async (id: string, isAnimeUnity: boolean = false) => {
+  for (let i = 0; i < 3; i++) {
+    try {
+      if (isAnimeUnity) {
+        const result = await animeunity.fetchAnimeInfo(id);
+        if (result && result.id) return result;
+      } else {
+        const result = await animekai.fetchAnimeInfo(id);
+        if (result && result.id) return result;
+      }
+    } catch (err: any) {
+      console.log(`Attempt ${i + 1} failed for ${isAnimeUnity ? 'AnimeUnity' : 'AnimeKai'} ID ${id}: ${err.message}`);
+      
+      if (isAnimeUnity && (err.message.includes('405') || err.message.includes('403') || err.message.includes('fetch'))) {
+        console.log(`Trying proxy for AnimeUnity ID: ${id}`);
+        const proxyData = await fetchViaProxy(`https://animeunity.to/anime/${id}`);
+        if (proxyData && proxyData.id) {
+          return proxyData;
+        }
+      }
+      
+      if (i < 2) await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+  return null;
+};
+
 const mapAnimeKaiToUI = (info: any) => {
   return {
     _id: info.id,
@@ -75,36 +126,41 @@ export const getDetails = async (req: Request, res: Response) => {
     }
 
     let data = null;
-    let source = "animeunity";
     const isNumeric = /^\d+$/.test(id);
     const isAnimeUnityFormat = /^\d+-[a-z-]+$/.test(id);
+    const isAnimeKaiFormat = /^[a-z][a-z0-9-]+-\d+[a-z]*$/.test(id);
 
     if (isNumeric || isAnimeUnityFormat) {
-      let unityId = id;
-      if (isAnimeUnityFormat) {
-        unityId = id.split('-')[0];
-      }
+      let unityId = isAnimeUnityFormat ? id.split('-')[0] : id;
       
-      try {
-        console.log(`Fetching from AnimeUnity for ID: ${unityId}`);
-        const info = await animeunity.fetchAnimeInfo(unityId);
-        if (info && info.id) {
-          data = { local: mapAnimeUnityToUI(info), source: "animeunity" };
-          console.log(`AnimeUnity success for ID: ${unityId}`);
-        }
-      } catch (err) {
-        console.log(`AnimeUnity error:`, err);
+      console.log(`Fetching AnimeUnity for ID: ${unityId} (original: ${id})`);
+      const info = await fetchAnimeInfoWithFallback(unityId, true);
+      
+      if (info && info.id) {
+        data = { local: mapAnimeUnityToUI(info), source: "animeunity" };
+        console.log(`AnimeUnity success for ID: ${unityId}`);
+      }
+    } else if (isAnimeKaiFormat) {
+      console.log(`Fetching AnimeKai for ID: ${id}`);
+      const info = await fetchAnimeInfoWithFallback(id, false);
+      
+      if (info && info.id) {
+        data = { local: mapAnimeKaiToUI(info), source: "animekai" };
+        console.log(`AnimeKai success for ID: ${id}`);
       }
     } else {
-      try {
-        console.log(`Fetching from AnimeKai for ID: ${id}`);
-        const info = await animekai.fetchAnimeInfo(id);
-        if (info && info.id) {
-          data = { local: mapAnimeKaiToUI(info), source: "animekai" };
-          console.log(`AnimeKai success for ID: ${id}`);
+      console.log(`Unknown ID format, trying both providers for: ${id}`);
+      
+      const kaiInfo = await fetchAnimeInfoWithFallback(id, false);
+      if (kaiInfo && kaiInfo.id) {
+        data = { local: mapAnimeKaiToUI(kaiInfo), source: "animekai" };
+        console.log(`AnimeKai success for ID: ${id}`);
+      } else {
+        const unityInfo = await fetchAnimeInfoWithFallback(id, true);
+        if (unityInfo && unityInfo.id) {
+          data = { local: mapAnimeUnityToUI(unityInfo), source: "animeunity" };
+          console.log(`AnimeUnity success for ID: ${id}`);
         }
-      } catch (err) {
-        console.log(`AnimeKai error:`, err);
       }
     }
 
@@ -137,8 +193,8 @@ export const getDetails = async (req: Request, res: Response) => {
               },
               source: "anipub"
             };
+            console.log(`Anipub success for ID: ${id}`);
           }
-          console.log(`Anipub success for ID: ${id}`);
         }
       } catch (err) {
         console.log(`Anipub error:`, err);

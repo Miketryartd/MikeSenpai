@@ -3,8 +3,6 @@ import { Request, Response } from "express";
 import SearchVal from "../ZodMod/SearchInputVal.js";
 import { ANIME } from "@consumet/extensions";
 
-const animeunity = new ANIME.AnimeUnity();
-
 const headers = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   'Accept': 'application/json, text/plain, */*',
@@ -45,6 +43,47 @@ const getTitle = (title: any): string => {
   return "Unknown";
 };
 
+const searchWithProxy = async (query: string) => {
+  const proxyUrls = [
+    'https://cors-anywhere.herokuapp.com/',
+    'https://api.allorigins.win/raw?url=',
+    'https://proxy.cors.sh/',
+  ];
+  
+  for (const proxy of proxyUrls) {
+    try {
+      console.log(`Trying proxy: ${proxy}`);
+      const encodedQuery = encodeURIComponent(query);
+      const response = await fetch(`${proxy}https://animeunity.to/api/search?q=${encodedQuery}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`Proxy ${proxy} succeeded`);
+        return data;
+      }
+    } catch (err) {
+      console.log(`Proxy ${proxy} failed:`, err);
+    }
+  }
+  return null;
+};
+
+const fetchWithRetry = async (query: string, retries = 3): Promise<any> => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const animeunity = new ANIME.AnimeUnity();
+      return await animeunity.search(query);
+    } catch (err: any) {
+      console.log(`Direct attempt ${i + 1} failed:`, err.message);
+      if (i === retries - 1) {
+        console.log("All direct attempts failed, trying proxy...");
+        return await searchWithProxy(query);
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+  return null;
+};
+
 export const SearchAnime = async (req: Request, res: Response) => {
   try {
     const parsed = SearchVal.safeParse(req.params);
@@ -64,19 +103,19 @@ export const SearchAnime = async (req: Request, res: Response) => {
     if (query.length <= 2) {
       const suggestions = commonAnimeMap[query];
       if (suggestions && suggestions.length > 0) {
-        console.log(`Short query "${query}" - fetching suggestions from AnimeUnity`);
+        console.log(`Short query "${query}" - fetching suggestions`);
         
         const suggestionResults = [];
         for (const suggestion of suggestions.slice(0, 6)) {
           try {
-            const res = await animeunity.search(suggestion);
-            if (res.results && res.results.length > 0) {
-              for (const result of res.results.slice(0, 3)) {
+            const result = await fetchWithRetry(suggestion);
+            if (result && result.results && result.results.length > 0) {
+              for (const anime of result.results.slice(0, 3)) {
                 suggestionResults.push({
-                  Id: result.id,
-                  Name: getTitle(result.title),
-                  Image: result.image || "",
-                  finder: getTitle(result.title).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                  Id: anime.id,
+                  Name: getTitle(anime.title),
+                  Image: anime.image || "",
+                  finder: getTitle(anime.title).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
                   source: "animeunity"
                 });
               }
@@ -109,8 +148,8 @@ export const SearchAnime = async (req: Request, res: Response) => {
     console.log("Trying AnimeUnity for:", query);
     
     try {
-      const unityResults = await animeunity.search(query);
-      if (unityResults.results && unityResults.results.length > 0) {
+      const unityResults = await fetchWithRetry(query);
+      if (unityResults && unityResults.results && unityResults.results.length > 0) {
         data = {
           results: unityResults.results.map((anime: any) => ({
             Id: anime.id,

@@ -72,39 +72,48 @@ function EpisodeList({ onSelectEp, animeId }: Props) {
  
   const hasEpisodes = episodes.length > 0;
 
-  const handleEpisodeClick = async (episode: any, epNumber: number) => {
-    try {
-      setLoadingEpisode(`ep-${epNumber}`);
-      let videoUrl: string | null = null;
-
-      const episodeId = episode.link || episode.episodeId;
-      console.log(`🎬 Fetching sources for episode ${epNumber} from ${episodeId}`);
+ // frontend/src/Components/EpisodeList.tsx
+const handleEpisodeClick = async (episode: any, epNumber: number) => {
+  if (loadingEpisode) return;
+  
+  setLoadingEpisode(`ep-${epNumber}`);
+  
+  try {
+    const episodeId = episode.link || episode.episodeId;
+    
+    if (!episodeId) {
+      alert(`Episode ${epNumber} has no valid ID`);
+      setLoadingEpisode(null);
+      return;
+    }
+    
+    console.log(`Fetching sources for episode ${epNumber} from ${episodeId}`);
+    
+    const sourcesResponse = await getMultiEpisodeSource(episodeId);
+    
+    if (sourcesResponse && sourcesResponse.sources && sourcesResponse.sources.length > 0) {
+      const bestSource = sourcesResponse.sources.find((s: any) => s.quality === '1080p') 
+        || sourcesResponse.sources.find((s: any) => s.quality === '720p')
+        || sourcesResponse.sources[0];
       
-      const sourcesResponse = await getMultiEpisodeSource(episodeId);
-      
-      if (sourcesResponse && sourcesResponse.sources && sourcesResponse.sources.length > 0) {
-        const bestSource = sourcesResponse.sources.find((s: any) => s.quality === '1080p') 
-          || sourcesResponse.sources.find((s: any) => s.quality === '720p')
-          || sourcesResponse.sources[0];
-        videoUrl = bestSource.url;
-        console.log(`✅ Got ${bestSource.quality} source from ${sourcesResponse.provider}`);
-      }
-
-      if (videoUrl) {
-        onSelectEp(videoUrl);
+      if (bestSource?.url) {
+        console.log(`Playing episode ${epNumber} with source: ${bestSource.quality}`);
+        onSelectEp(bestSource.url);
         markAsWatched(epNumber);
         setSelectedEpisode(epNumber);
       } else {
-        throw new Error("No video source found");
+        alert(`Episode ${epNumber} has no valid video URL`);
       }
-    } catch (err) {
-      console.error(`❌ Failed to load episode ${epNumber}:`, err);
-      alert(`Episode ${epNumber} could not be loaded. Please try another episode.`);
-    } finally {
-      setTimeout(() => setLoadingEpisode(null), 500);
+    } else {
+      alert(`Episode ${epNumber} could not be loaded. No sources available.`);
     }
-  };
-
+  } catch (err) {
+    console.error(`Failed to load episode ${epNumber}:`, err);
+    alert(`Episode ${epNumber} could not be loaded. Please try another episode.`);
+  } finally {
+    setTimeout(() => setLoadingEpisode(null), 500);
+  }
+};
   const AudioToggle = () => (
     <div className="flex gap-2 mb-5">
       {(["sub", "dub"] as const).map((type) => (
