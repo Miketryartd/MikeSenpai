@@ -28,7 +28,13 @@ export const fetchWithNgrok = async (endpoint: string, options: RequestInit = {}
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    return await response.json();
+    // Check if response has content before parsing JSON
+    const text = await response.text();
+    if (!text || text.trim() === '') {
+      throw new Error('Empty response from server');
+    }
+    
+    return JSON.parse(text);
   } catch (error) {
     console.error(`Fetch error for ${endpoint}:`, error);
     throw error;
