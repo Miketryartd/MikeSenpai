@@ -1,24 +1,14 @@
-import { DynamicUrl } from "../Utils/DynamicUrl";
 
-
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 
 export const authRegister = async (email: string, password: string) => {
-
-    try{
-
-        const url = `${DynamicUrl()}/mikenichan/api/auth/register`;
-        const res = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({email, password})
-        });
-        if (!res.ok) throw new Error("Error creating acc");
-        const data = await res.json();
-
-        return data;
-    } catch (err){
-        console.error("ERRor creating account", err);
-    }
-}
+  try {
+    const data = await fetchWithNgrok('/mikenichan/api/auth/register', {
+      method: "POST",
+      body: JSON.stringify({ email, password })
+    });
+    return data;
+  } catch (err) {
+    console.error("Error creating account", err);
+  }
+};

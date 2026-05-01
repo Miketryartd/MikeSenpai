@@ -1,25 +1,10 @@
-import { DynamicUrl } from "../Utils/DynamicUrl";
-
-
-
+// frontend/src/Services/getDetailAnime.ts
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 
 export const getDetailAnime = async (id: number | string | undefined) => {
-
-    try{
-        
-        const url = `${DynamicUrl()}/mikesenpai/api/getAnimeDetail/${id}`;
-        const res = await fetch(url, {
-            method: 'GET',
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (!res.ok) throw new Error("Error fetching url from backend");
-        const data = await res.json();
-        return data;
-    } catch (error) {
-        console.error("Error fetching data from backend/ possible server error", error);
-    }
-
-}
+  try {
+    return await fetchWithNgrok(`/mikesenpai/api/getAnimeDetail/${id}`);
+  } catch (error) {
+    console.error("Error fetching data from backend", error);
+  }
+};

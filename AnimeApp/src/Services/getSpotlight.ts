@@ -1,11 +1,9 @@
-
-import { DynamicUrl } from "../Utils/DynamicUrl";
+// frontend/src/Services/getSpotlight.ts
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 
 export const fetchSpotlight = async () => {
   try {
-    const res = await fetch(`${DynamicUrl()}/mikesenpai/api/spotlight`);
-    const data = await res.json();
-    return data;
+    return await fetchWithNgrok('/mikesenpai/api/spotlight');
   } catch (err) {
     console.error("fetchSpotlight error:", err);
     return { results: [] };

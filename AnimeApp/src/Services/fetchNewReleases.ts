@@ -1,10 +1,9 @@
-import { DynamicUrl } from "../Utils/DynamicUrl";
+// frontend/src/Services/fetchNewReleases.ts
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 
 export const fetchNewReleases = async (page: number = 1) => {
   try {
-    const res = await fetch(`${DynamicUrl()}/mikesenpai/api/new-releases?page=${page}`);
-    const data = await res.json();
-    return data;
+    return await fetchWithNgrok(`/mikesenpai/api/new-releases?page=${page}`);
   } catch (err) {
     console.error("fetchNewReleases error:", err);
     return { results: [], hasNextPage: false, totalPages: 0 };

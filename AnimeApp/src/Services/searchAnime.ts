@@ -1,5 +1,5 @@
 
-import { DynamicUrl } from "../Utils/DynamicUrl";
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 
 export async function searchAnime(query: string) {
     const cleanedQuery = query.trim();
@@ -13,11 +13,11 @@ export async function searchAnime(query: string) {
       console.log(`Short search query: "${cleanedQuery}" - trying flexible search`);
     }
   
-    const url = `${DynamicUrl()}/mikesenpai/api/searchAnime/${encodeURIComponent(cleanedQuery)}`;
+    const url = `/mikesenpai/api/searchAnime/${encodeURIComponent(cleanedQuery)}`;
     
     console.log(`Searching: ${cleanedQuery}`);
   
-    const res = await fetch(url);
+    const res = await fetchWithNgrok(url);
   
     if (!res.ok) {
       throw new Error(`Search failed: ${res.status}`);
