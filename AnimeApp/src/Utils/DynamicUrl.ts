@@ -1,5 +1,5 @@
 export const DynamicUrl = () => {
-    const prod = import.meta.env.NGROK_PROD
+    const prod = import.meta.env.VITE_BACKEND_PROD;
     const local = import.meta.env.VITE_BACKEND_LOCAL;
   
     const base = import.meta.env.MODE === "production" ? prod : local;
