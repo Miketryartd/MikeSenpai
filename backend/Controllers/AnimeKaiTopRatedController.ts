@@ -28,11 +28,11 @@ export const getTopRated = async (req: Request, res: Response) => {
       return res.status(200).json(cached);
     }
 
-    // Try different methods since fetchNewReleases might be broken
+
     let results = null;
     
     try {
-      // Method 1: Try search with empty string to get all
+
       const searchResults = await animekai.search("", page);
       if (searchResults.results && searchResults.results.length > 0) {
         results = searchResults;
@@ -43,7 +43,7 @@ export const getTopRated = async (req: Request, res: Response) => {
 
     if (!results) {
       try {
-        // Method 2: Try fetchRecentlyAdded
+      
         const recentResults = await animekai.fetchRecentlyAdded(page);
         if (recentResults.results && recentResults.results.length > 0) {
           results = recentResults;

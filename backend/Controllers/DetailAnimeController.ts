@@ -2,10 +2,15 @@
 import { Request, Response } from "express";
 import { ANIME } from "@consumet/extensions";
 import { createCache } from "../Utilities/cache.js";
+import { fetchWithRetry } from "../Utilities/fetchWithRetry.js";
 
 const animeunity = new ANIME.AnimeUnity();
 const animekai = new ANIME.AnimeKai();
 const cache = createCache<any>();
+
+const isAnipubFormat = (id: string): boolean => {
+  return /^\d+$/.test(id) || /^[a-z][a-z0-9-]+$/.test(id);
+};
 
 const getTitle = (title: any): string => {
   if (typeof title === 'string') return title;
@@ -111,6 +116,8 @@ const mapAnimeUnityToUI = (info: any) => {
   };
 };
 
+
+// backend/Controllers/DetailAnimeController.ts
 export const getDetails = async (req: Request, res: Response) => {
   try {
     let { id } = req.params;
@@ -129,72 +136,52 @@ export const getDetails = async (req: Request, res: Response) => {
     const isNumeric = /^\d+$/.test(id);
     const isAnimeUnityFormat = /^\d+-[a-z-]+$/.test(id);
     const isAnimeKaiFormat = /^[a-z][a-z0-9-]+-\d+[a-z]*$/.test(id);
+    const isAnipubSlug = /^[a-z][a-z0-9-]+$/.test(id) && !isAnimeKaiFormat;
 
-    if (isNumeric || isAnimeUnityFormat) {
-      let unityId = isAnimeUnityFormat ? id.split('-')[0] : id;
-      
-      console.log(`Fetching AnimeUnity for ID: ${unityId} (original: ${id})`);
+    if (isAnimeUnityFormat) {
+      let unityId = id.split('-')[0];
+      console.log(`Fetching AnimeUnity for ID: ${unityId}`);
       const info = await fetchAnimeInfoWithFallback(unityId, true);
-      
       if (info && info.id) {
         data = { local: mapAnimeUnityToUI(info), source: "animeunity" };
-        console.log(`AnimeUnity success for ID: ${unityId}`);
       }
     } else if (isAnimeKaiFormat) {
       console.log(`Fetching AnimeKai for ID: ${id}`);
       const info = await fetchAnimeInfoWithFallback(id, false);
-      
       if (info && info.id) {
         data = { local: mapAnimeKaiToUI(info), source: "animekai" };
-        console.log(`AnimeKai success for ID: ${id}`);
       }
-    } else {
-      console.log(`Unknown ID format, trying both providers for: ${id}`);
-      
-      const kaiInfo = await fetchAnimeInfoWithFallback(id, false);
-      if (kaiInfo && kaiInfo.id) {
-        data = { local: mapAnimeKaiToUI(kaiInfo), source: "animekai" };
-        console.log(`AnimeKai success for ID: ${id}`);
-      } else {
-        const unityInfo = await fetchAnimeInfoWithFallback(id, true);
-        if (unityInfo && unityInfo.id) {
-          data = { local: mapAnimeUnityToUI(unityInfo), source: "animeunity" };
-          console.log(`AnimeUnity success for ID: ${id}`);
-        }
-      }
-    }
-
-    if (!data) {
-      console.log(`Falling back to Anipub for ID: ${id}`);
+    } else if (isNumeric || isAnipubSlug) {
+      console.log(`Fetching Anipub for ID/slug: ${id}`);
       try {
-        const response = await fetch(`https://anipub.xyz/anime/api/details/${id}`);
+       const response = await fetchWithRetry(`https://anipub.xyz/api/info/${id}`);
         if (response.ok) {
-          const anipubData = await response.json();
-          if (anipubData.local) {
-            data = {
-              local: {
-                _id: anipubData.local._id,
-                title: anipubData.local.Name,
-                Name: anipubData.local.Name,
-                ImagePath: anipubData.local.ImagePath,
-                Cover: anipubData.local.Cover,
-                DescripTion: anipubData.local.DescripTion,
-                Genres: anipubData.local.Genres || [],
-                epCount: anipubData.local.epCount || 0,
-                Status: anipubData.local.Status,
-                Duration: anipubData.local.Duration,
-                MALScore: anipubData.local.MALScore,
-                Studios: anipubData.local.Studios,
-                Producers: anipubData.local.Producers,
-                Premiered: anipubData.local.Premiered,
-                Aired: anipubData.local.Aired,
-                Synonyms: anipubData.local.Synonyms,
-                RatingsNum: anipubData.local.RatingsNum || 0
-              },
+          const info = await response.json();
+          const fixImage = (path: string) => path?.startsWith('https://') ? path : `https://anipub.xyz/${path}`;
+          data = {
+            local: {
+              _id: info._id,
+              title: info.Name,
+              Name: info.Name,
+              ImagePath: fixImage(info.ImagePath),
+              Cover: fixImage(info.Cover),
+              DescripTion: info.DescripTion || "No description available.",
+              Genres: info.Genres || [],
+              epCount: info.epCount || 0,
+              Status: info.Status || "Unknown",
+              Duration: info.Duration || "TV",
+              MALScore: info.MALScore || "N/A",
+              Studios: info.Studios || "Unknown",
+              Producers: info.Producers || "Unknown",
+              Premiered: info.Premiered || "Unknown",
+              Aired: info.Aired || "Unknown",
+              Synonyms: info.Synonyms || "",
+              RatingsNum: info.RatingsNum || 0,
               source: "anipub"
-            };
-            console.log(`Anipub success for ID: ${id}`);
-          }
+            },
+            source: "anipub"
+          };
+          console.log(`Anipub success for ID: ${id}`);
         }
       } catch (err) {
         console.log(`Anipub error:`, err);

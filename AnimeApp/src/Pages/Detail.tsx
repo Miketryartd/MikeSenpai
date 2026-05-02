@@ -80,7 +80,6 @@ function Detail() {
   const { loading, result, error } = useAnimeDetails(resolvedId || id);
   const [currentVideo, setCurrentVideo] = useState<string | null>(null);
 
- // frontend/src/Pages/Detail.tsx - Update the resolveAnimeId function
 useEffect(() => {
   const resolveAnimeId = async () => {
     const idToResolve = id || finder;
@@ -191,7 +190,7 @@ useEffect(() => {
             />
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs bg-purple-600 px-2 py-1 rounded">ANIME</span>
+                <span className="text-xs bg-purple-600/40 px-2 py-1 rounded">ANIME</span>
                
               </div>
               <h1 className="text-3xl md:text-5xl font-bold mb-3">{anime?.title || anime?.Name || 'Unknown Title'}</h1>

@@ -1,7 +1,6 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {  fetchWithNgrok } from "../Utils/DynamicUrl";
+import { fetchWithNgrok } from "../Utils/DynamicUrl";
 
 interface HeroAnime {
   title: string;
@@ -11,12 +10,14 @@ interface HeroAnime {
   type: string;
   rating: number;
   id: string;
+  rank: number;
 }
 
 function Hero() {
   const [featured, setFeatured] = useState<HeroAnime | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchHeroData = async () => {
       setLoading(true);
@@ -35,6 +36,7 @@ function Hero() {
             description: selected.description || "No description available.",
             type: selected.type || "TV",
             rating: selected.rating || 0,
+            rank: selected.rank || 0,
             id: selected.id
           });
         } else {
@@ -87,9 +89,9 @@ function Hero() {
       
       <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d14] via-black/60 to-black/40" />
 
-      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between h-full px-6 md:px-12 lg:px-20">
+      <div className="relative z-10 flex flex-col md:flex-row items-center mt-10 justify-between h-full px-6 md:px-12 lg:px-20">
         <div className="max-w-2xl text-white text-center md:text-left">
-          <div className="flex flex-wrap items-center justify-center md:justify-start mt-10 gap-2 mb-4">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-4">
             <span className="text-xs bg-purple-600 px-3 py-1 rounded-full font-semibold tracking-wide">
               FEATURED
             </span>
@@ -99,6 +101,11 @@ function Hero() {
               </svg>
               {featured.rating}
             </span>
+            {featured.rank > 0 && (
+              <span className="text-xs bg-purple-900/80 px-3 py-1 rounded-full">
+                Rank #{featured.rank}
+              </span>
+            )}
             <span className="text-xs bg-purple-900/80 px-3 py-1 rounded-full">
               {featured.type}
             </span>

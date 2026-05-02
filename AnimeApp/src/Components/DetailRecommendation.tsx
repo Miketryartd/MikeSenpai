@@ -218,7 +218,7 @@ function DetailRecommendation({ currentAnimeId }: { currentAnimeId: string }) {
               )}
               
               {anime.type && (
-                <div className="absolute top-2 left-2 bg-purple-600/90 backdrop-blur-sm px-2 py-0.5 rounded-lg">
+                <div className="absolute top-2 left-2 bg-purple-600/50 backdrop-blur-sm px-2 py-0.5 rounded-lg">
                   <span className="text-[9px] font-bold text-white">{anime.type}</span>
                 </div>
               )}

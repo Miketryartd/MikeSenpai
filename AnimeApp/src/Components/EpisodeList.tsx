@@ -72,7 +72,9 @@ function EpisodeList({ onSelectEp, animeId }: Props) {
  
   const hasEpisodes = episodes.length > 0;
 
- // frontend/src/Components/EpisodeList.tsx
+
+
+
 const handleEpisodeClick = async (episode: any, epNumber: number) => {
   if (loadingEpisode) return;
   
@@ -88,6 +90,15 @@ const handleEpisodeClick = async (episode: any, epNumber: number) => {
     }
     
     console.log(`Fetching sources for episode ${epNumber} from ${episodeId}`);
+    
+    if (episodeId.includes('gogoanime.com.by') || episodeId.includes('streaming.php')) {
+      console.log(`Direct Gogoanime URL detected, playing directly`);
+      onSelectEp(episodeId);
+      markAsWatched(epNumber);
+      setSelectedEpisode(epNumber);
+      setLoadingEpisode(null);
+      return;
+    }
     
     const sourcesResponse = await getMultiEpisodeSource(episodeId);
     

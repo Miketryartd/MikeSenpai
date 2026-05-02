@@ -1,238 +1,152 @@
-MikeSenpai - Anime Streaming Platform
-A full-stack anime streaming web application with user authentication, watch history, bookmarks, and multi-provider support (Anipub primary, AnimeKai fallback).
+# MikeSenpai - Anime Streaming Platform
 
-Features
+A full-stack anime streaming web application with user authentication, watch history, bookmarks, and multi-provider support (AnimeUnity as primary, AnimeKai fallback).
+
+## Features
+
 Browse anime by genre, top rated, new releases, and binge-worthy recommendations
-
 Search anime with fuzzy matching and suggestions
-
 Watch episodes with sub/dub support
-
 User authentication (register/login with JWT)
-
 Watch history tracking with localStorage
-
 Bookmark anime (database storage with sync across devices)
-
 Responsive dashboard sidebar for history and bookmarks
-
-Multi-provider fallback system (Anipub as primary, AnimeKai as fallback)
-
+Multi-provider fallback system (AnimeUnity primary for episodes, AnimeKai for info)
 Visual source badges (green for working, orange for unstable)
+Ngrok tunneling for production without credit card
+Cloudflare Worker proxy support (bypasses IP blocks)
 
-Tech Stack
-Frontend:
+## Tech Stack
 
-React with TypeScript
+Frontend: React with TypeScript, Tailwind CSS, Vercel (deployment)
+Backend: Node.js with Express, TypeScript, MongoDB with Mongoose, JWT authentication, Bcrypt, @consumet/extensions, Ngrok/Cloudflare Tunnel, Render (deployment)
 
-Tailwind CSS
+## Project Structure
 
-Libraries:
-Consumet
-Backend:
-
-Node.js with Express
-Zod for validation
-TypeScript
-
-MongoDB with Mongoose
-
-JWT authentication
-
-Bcrypt for password hashing
-
-Consumet extensions for anime data
-
-Project Structure
-text
 MikeSenpai/
 ├── backend/
-│   ├── Config/
-│   ├── Controllers/
-│   ├── Middleware/
-│   ├── Models/
-│   ├── Routes/
-│   ├── Type/
-│   ├── Utilities/
-│   └── ZodMod/
+│ ├── Config/ # Configuration files
+│ ├── Controllers/ # Business logic
+│ ├── Middleware/ # Auth and validation
+│ ├── Models/ # MongoDB schemas
+│ ├── Routes/ # API endpoints
+│ ├── Type/ # TypeScript interfaces
+│ ├── Utilities/ # Helpers and cache
+│ └── ZodMod/ # Validation schemas
 ├── AnimeApp/
-│   ├── public/
-│   ├── src/
-│   │   ├── Components/
-│   │   ├── Config/
-│   │   ├── Hooks/
-│   │   ├── Pages/
-│   │   ├── Services/
-│   │   ├── Types/
-│   │   └── Utils/
-│   └── package.json
+│ ├── public/
+│ ├── src/
+│ │ ├── Components/ # React components
+│ │ ├── Config/ # App configuration
+│ │ ├── Hooks/ # Custom React hooks
+│ │ ├── Pages/ # Page components
+│ │ ├── Services/ # API calls
+│ │ ├── Types/ # TypeScript types
+│ │ └── Utils/ # Helpers (DynamicUrl)
+│ └── package.json
 └── README.md
-Installation
-Prerequisites
-Node.js (v20 or higher)
 
-MongoDB database
+## Installation
 
-Git
+Prerequisites: Node.js (v20 or higher), MongoDB database, Git
 
-Backend Setup
-Clone the repository
-
-bash
+Backend Setup:
 git clone https://github.com/Miketryartd/MikeSenpai.git
 cd MikeSenpai/backend
-Install dependencies
-
-bash
 npm install
-Create a .env file in the Config folder
-
-env
-MONGOOSE_SECRET_PRIV_KEY=your_mongodb_connection_string
-JWT_TOKEN_REF_PRIV=your_jwt_secret_key
-HOST=3000
-Build and run the backend
-
-bash
+Create Config/.env file with: MONGOOSE_SECRET_PRIV_KEY=your_mongodb_connection_string, JWT_TOKEN_REF_PRIV=your_jwt_secret_key, HOST=3000
 npm run build
 npm start
-Frontend Setup
-Navigate to the frontend directory
 
-bash
+Frontend Setup:
 cd ../AnimeApp
-Install dependencies
-
-bash
 npm install
-Create a .env file
-
-env
-VITE_BACKEND_PROD=https://your-backend-url.com
-VITE_BACKEND_LOCAL=http://localhost:3000
-Run the development server
-
-bash
+Create .env file with: VITE_BACKEND_PROD=https://your-backend-url.com, VITE_BACKEND_LOCAL=http://localhost:3000
 npm run dev
-API Endpoints
-Anipub Routes (Primary)
-Method	Endpoint	Description
-GET	/api/animeAll	Get total anime count
-GET	/api/searchAnime/:query	Search anime
-GET	/api/topRated/:page	Get top rated anime
-GET	/api/getAnimeDetail/:id	Get anime details
-GET	/api/getStream/:id	Get episode list
-GET	/api/findByGenre/:genre	Filter by genre
-GET	/api/getInfo/:id	Get anime info
-AnimeKai Routes (Fallback)
-Method	Endpoint	Description
-GET	/api/animekai/top-rated	Get top rated from AnimeKai
-GET	/api/animekai/new-releases	Get new releases
-GET	/api/animekai/recently-added	Get recently added
-GET	/api/animekai/latest-completed	Get latest completed
-GET	/api/animekai/info/:id	Get anime info with recommendations
-User Routes
-Method	Endpoint	Description
-POST	/api/auth/register	Register new user
-POST	/api/auth/login	Login user
-Comment Routes
-Method	Endpoint	Description
-POST	/api/auth/comment/:id/:finder	Add comment (auth required)
-GET	/api/auth/getComment/:id/:finder	Get comments
-Environment Variables
-Backend (.env)
-Variable	Description
-MONGOOSE_SECRET_PRIV_KEY	MongoDB connection string
-JWT_TOKEN_REF_PRIV	Secret key for JWT tokens
-HOST	Port number (default: 3000)
-Frontend (.env)
-Variable	Description
-VITE_BACKEND_PROD	Production backend URL
-VITE_BACKEND_LOCAL	Local development backend URL
-Database Schema
-User Model
-typescript
-{
-  email: string,
-  password: string (hashed)
-}
-Comment Model
-typescript
-{
-  uid: ObjectId,
-  email: string,
-  comment: string,
-  id: number,
-  finder: string,
-  location: string,
-  createdAt: Date
-}
-How to Deploy
-Deploy Backend to Render
-Push your code to GitHub
 
-Create a new Web Service on Render
+## Production Tunneling (No Credit Card Required)
 
-Connect your GitHub repository
+Option 1 - Ngrok (Free, requires PC on):
+Download from https://ngrok.com/download
+cd backend
+ngrok http 3000
+Keep running 24/7 with PM2: pm2 start ngrok -- --http 3000
 
-Set build command: npm install && npm run build
+Option 2 - Cloudflare Tunnel (Free, persistent):
+Install cloudflared from https://github.com/cloudflare/cloudflared/releases
+cloudflared tunnel --url http://localhost:3000
 
-Set start command: npm start
+Option 3 - Cloudflare Worker (Free, 24/7, no PC needed):
+Deploy worker with code that proxies requests through Cloudflare IPs to bypass blocks
 
-Add environment variables in Render dashboard
+## API Endpoints
 
-Click Deploy
+AnimeUnity Routes (Primary - Working Episodes):
+GET /api/multi/stream/:id - Get episode list
+GET /api/multi/episode-source/:episodeId - Get video source URLs
+GET /api/getAnimeDetail/:id - Get anime details
+GET /api/searchAnime/:query - Search anime
+GET /api/topRated/:page - Get top rated
 
-Deploy Frontend to Vercel
-Push your code to GitHub
+AnimeKai Routes (Fallback - Info Only):
+GET /api/animekai/top-rated - Get top rated
+GET /api/animekai/new-releases - Get new releases
+GET /api/map/animekai/:id - Map AnimeKai ID to AnimeUnity
 
-Import project to Vercel
+User Routes:
+POST /api/auth/register - Register new user
+POST /api/auth/login - Login user
 
-Set build command: npm run build
+Comment Routes:
+POST /api/auth/comment/:id/:finder - Add comment (auth required)
+GET /api/auth/getComment/:id/:finder - Get comments
 
-Set output directory: dist
+## Environment Variables
 
-Add environment variables in Vercel dashboard
+Backend (.env):
+MONGOOSE_SECRET_PRIV_KEY - MongoDB connection string
+JWT_TOKEN_REF_PRIV - Secret key for JWT tokens
+HOST - Port number (default: 3000)
 
-Click Deploy
+Frontend (.env):
+VITE_BACKEND_PROD - Production backend URL (ngrok/Cloudflare)
+VITE_BACKEND_LOCAL - Local development backend URL
 
-Key Components Explained
-WatchOverlay
-Wraps anime cards and navigates to detail page with both ID and finder parameters.
+## Database Schema
 
-SourceBadge
-Displays green badge for Anipub (working) and orange badge for AnimeKai (unstable).
+User Model: { email: string, password: string (hashed) }
+Comment Model: { uid: ObjectId, email: string, comment: string, id: number, finder: string, location: string, createdAt: Date }
 
-DashboardSidebar
-Shows watch history from localStorage and bookmarks from database. Responsive on mobile with slide-out menu.
+## Deployment
 
-EpisodeList
-Handles episode display with chunk pagination (100 episodes per chunk), sub/dub toggle, and watch history tracking.
+Deploy Backend to Render:
+Push code to GitHub, create Web Service on Render, connect repository, build command: npm install && npm run build, start command: npm start, add environment variables in Render dashboard
 
-Watch History Storage
-Watch history is stored in localStorage with the following keys:
+Deploy Frontend to Vercel:
+Push code to GitHub, import project to Vercel, build command: npm run build, output directory: dist, add environment variables in Vercel dashboard
 
-watched_{animeId} - Array of watched episode numbers
+## Key Components
 
-watched_time_{animeId} - Timestamp of last watch
+WatchOverlay: Wraps anime cards and navigates to detail page with both ID and finder parameters
+SourceBadge: Displays green badge for AnimeUnity (working), orange badge for AnimeKai (unstable)
+DashboardSidebar: Shows watch history from localStorage and bookmarks from database, responsive on mobile
+EpisodeList: Handles episode display with chunk pagination (100 episodes per chunk), sub/dub toggle, and watch history tracking
 
-anime_info_{animeId} - Anime metadata (title, image, finder)
+## Watch History Storage
 
-Contributing
-Fork the repository
+Watch history stored in localStorage with keys:
+watched*{animeId} - Array of watched episode numbers
+watched_time*{animeId} - Timestamp of last watch
+anime*info*{animeId} - Anime metadata (title, image, finder)
 
-Create a feature branch
+## Contributing
 
-Make your changes
+Fork the repository, create a feature branch, make changes, submit a pull request
 
-Submit a pull request
+## License
 
-License
-This project is for educational purposes and one of my dream of making a anime site. All anime content is sourced from external providers.
+This project is for educational purposes. All anime content is sourced from external providers.
 
-Acknowledgments
-Consumet extensions for anime data
+## Acknowledgments
 
-Anipub and AnimeKai APIs
-
-Tailwind CSS for styling
+Consumet extensions for anime data, AnimeUnity for working episode sources, AnimeKai for anime info, Tailwind CSS for styling

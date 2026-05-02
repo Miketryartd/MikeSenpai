@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { ANIME } from "@consumet/extensions";
 import { createCache } from "../Utilities/cache.js";
 import { fetchViaCloudflareProxy } from "../Utilities/worker.js";
+import { fetchWithRetry } from "../Utilities/fetchWithRetry.js";
 const cache = createCache<any>();
 const animeunity = new ANIME.AnimeUnity();
 
@@ -21,11 +22,10 @@ const getTitle = (title: any): string => {
   return "Unknown";
 };
 
-// backend/Controllers/MultiProviderStreamController.ts
-// Replace the fetchViaProxy function with this:
+
 
 const fetchViaProxy = async (url: string): Promise<any> => {
-  // Try Cloudflare Worker FIRST (your own proxy)
+ 
   const cloudflareWorkerUrl = process.env.CLOUDFLARE_WORKER_URL || 'https://animeunityproxy.mikeleano26.workers.dev';
   
   try {
@@ -41,7 +41,7 @@ const fetchViaProxy = async (url: string): Promise<any> => {
     console.log(`Cloudflare Worker proxy failed:`, err);
   }
   
-  // Fallback to other proxies if Cloudflare fails
+
   const proxyServers = [
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     `https://cors-anywhere.herokuapp.com/${url}`,
@@ -113,65 +113,67 @@ export const getMultiProviderStream = async (req: Request, res: Response) => {
     }
 
     let data = null;
-    let resolvedId = null;
-    
     const isNumeric = /^\d+$/.test(animeId);
     const isAnimeUnityFormat = /^\d+-[a-z-]+$/.test(animeId);
+    const isAnimeKaiFormat = /^[a-z][a-z0-9-]+-\d+[a-z]*$/.test(animeId);
 
-    if (isNumeric || isAnimeUnityFormat) {
-      resolvedId = isAnimeUnityFormat ? animeId.split('-')[0] : animeId;
-      console.log(`Direct AnimeUnity ID: ${resolvedId}`);
-    } else {
-      const extractedTitle = extractAnimeTitle(animeId);
-      console.log(`Extracted title from "${animeId}": "${extractedTitle}"`);
-      
-      const searchResult = await searchAnimeUnity(extractedTitle);
-      
-      if (searchResult && searchResult.results && searchResult.results.length > 0) {
-        const bestMatch = searchResult.results[0];
-        resolvedId = bestMatch.id;
-        console.log(`Found AnimeUnity ID: ${resolvedId} for title: ${getTitle(bestMatch.title)}`);
-      } else {
-        console.log(`No AnimeUnity match found for: ${extractedTitle}`);
-        return res.status(404).json({ error: `Could not find anime: ${extractedTitle}` });
-      }
-    }
-
-    for (let i = 0; i < 3; i++) {
+    if (isNumeric) {
+      console.log(`Numeric ID ${animeId} - trying Anipub first`);
       try {
-        console.log(`Fetching episodes from AnimeUnity for ID: ${resolvedId}`);
-        const info = await animeunity.fetchAnimeInfo(resolvedId);
+       
+       const response = await fetchWithRetry(`https://anipub.xyz/v1/api/details/${animeId}`);
         
-        if (info && info.episodes && info.episodes.length > 0) {
-          data = {
-            source: "animeunity",
-            local: {
-              _id: info.id,
-              name: getTitle(info.title),
-              ep: info.episodes.map((ep: any) => ({
-                link: ep.id,
-                number: ep.number,
-                title: ep.title || `Episode ${ep.number}`,
-                image: ep.image || ""
-              })),
+        if (response.ok) {
+          const streamData = await response.json();
+          if (streamData && streamData.local && (streamData.local.link || streamData.local.ep?.length)) {
+            const stripSrc = (link: string) => link.replace('src=', '');
+            
+            const episodes = [];
+            if (streamData.local.link) {
+              episodes.push({ link: stripSrc(streamData.local.link), number: 1, title: "Episode 1" });
             }
-          };
-          console.log(`AnimeUnity returned ${info.episodes.length} episodes`);
-          break;
+            if (streamData.local.ep && Array.isArray(streamData.local.ep)) {
+              streamData.local.ep.forEach((ep: any, index: number) => {
+                episodes.push({ 
+                  link: stripSrc(ep.link), 
+                  number: index + 2, 
+                  title: `Episode ${index + 2}` 
+                });
+              });
+            }
+            
+            data = {
+              source: "anipub",
+              local: {
+                _id: animeId,
+                name: streamData.local.name || "Unknown",
+                ep: episodes
+              }
+            };
+            console.log(`Anipub returned ${episodes.length} episodes for ID ${animeId}`);
+          }
+        } else {
+          console.log(`Anipub returned ${response.status} for ID ${animeId}`);
         }
-      } catch (err: any) {
-        console.log(`Attempt ${i + 1} failed: ${err.message}`);
-        
-        if (err.message.includes('405') || err.message.includes('403')) {
-          console.log(`Trying proxy for AnimeUnity ID: ${resolvedId}`);
-          const proxyResult = await fetchViaProxy(`https://animeunity.to/anime/${resolvedId}`);
-          if (proxyResult && proxyResult.episodes) {
+      } catch (err) {
+        console.log(`Anipub stream failed:`, err);
+      }
+    } else if (isAnimeUnityFormat) {
+      let resolvedId = animeId.split('-')[0];
+      console.log(`AnimeUnity format ID: ${resolvedId}`);
+      
+      for (let i = 0; i < 3; i++) {
+        try {
+          console.log(`Fetching episodes from AnimeUnity for ID: ${resolvedId}`);
+          const info = await animeunity.fetchAnimeInfo(resolvedId);
+          
+          if (info && info.episodes && info.episodes.length > 0) {
             data = {
               source: "animeunity",
               local: {
-                _id: proxyResult.id,
-                name: getTitle(proxyResult.title),
-                ep: proxyResult.episodes.map((ep: any) => ({
+                _id: info.id,
+                name: getTitle(info.title),
+                ep: info.episodes.map((ep: any) => ({
                   link: ep.id,
                   number: ep.number,
                   title: ep.title || `Episode ${ep.number}`,
@@ -179,12 +181,76 @@ export const getMultiProviderStream = async (req: Request, res: Response) => {
                 })),
               }
             };
-            console.log(`Proxy returned ${proxyResult.episodes.length} episodes`);
+            console.log(`AnimeUnity returned ${info.episodes.length} episodes`);
             break;
           }
+        } catch (err: any) {
+          console.log(`Attempt ${i + 1} failed: ${err.message}`);
+          if (err.message.includes('405') || err.message.includes('403')) {
+            console.log(`Trying proxy for AnimeUnity ID: ${resolvedId}`);
+            const proxyResult = await fetchViaProxy(`https://animeunity.to/anime/${resolvedId}`);
+            if (proxyResult && proxyResult.episodes) {
+              data = {
+                source: "animeunity",
+                local: {
+                  _id: proxyResult.id,
+                  name: getTitle(proxyResult.title),
+                  ep: proxyResult.episodes.map((ep: any) => ({
+                    link: ep.id,
+                    number: ep.number,
+                    title: ep.title || `Episode ${ep.number}`,
+                    image: ep.image || ""
+                  })),
+                }
+              };
+              console.log(`Proxy returned ${proxyResult.episodes.length} episodes`);
+              break;
+            }
+          }
+          if (i < 2) await new Promise(resolve => setTimeout(resolve, 1000));
         }
+      }
+    } else if (isAnimeKaiFormat) {
+      const extractedTitle = extractAnimeTitle(animeId);
+      console.log(`Extracted title from AnimeKai ID "${animeId}": "${extractedTitle}"`);
+      
+      const searchResult = await searchAnimeUnity(extractedTitle);
+      
+      if (searchResult && searchResult.results && searchResult.results.length > 0) {
+        const bestMatch = searchResult.results[0];
+        let resolvedId = bestMatch.id;
+        console.log(`Found AnimeUnity ID: ${resolvedId} for title: ${getTitle(bestMatch.title)}`);
         
-        if (i < 2) await new Promise(resolve => setTimeout(resolve, 1000));
+        for (let i = 0; i < 3; i++) {
+          try {
+            console.log(`Fetching episodes from AnimeUnity for ID: ${resolvedId}`);
+            const info = await animeunity.fetchAnimeInfo(resolvedId);
+            
+            if (info && info.episodes && info.episodes.length > 0) {
+              data = {
+                source: "animeunity",
+                local: {
+                  _id: info.id,
+                  name: getTitle(info.title),
+                  ep: info.episodes.map((ep: any) => ({
+                    link: ep.id,
+                    number: ep.number,
+                    title: ep.title || `Episode ${ep.number}`,
+                    image: ep.image || ""
+                  })),
+                }
+              };
+              console.log(`AnimeUnity returned ${info.episodes.length} episodes`);
+              break;
+            }
+          } catch (err: any) {
+            console.log(`Attempt ${i + 1} failed: ${err.message}`);
+            if (i < 2) await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+      } else {
+        console.log(`No AnimeUnity match found for: ${extractedTitle}`);
+        return res.status(404).json({ error: `Could not find anime: ${extractedTitle}` });
       }
     }
 
@@ -204,7 +270,7 @@ export const getMultiProviderStream = async (req: Request, res: Response) => {
 export const getMultiProviderEpisodeSource = async (req: Request, res: Response) => {
   try {
     const episodeIdParam = req.params.episodeId;
-    const episodeId = getStringParam(episodeIdParam);
+    let episodeId = getStringParam(episodeIdParam);
 
     console.log(`Episode source requested for: ${episodeId}`);
 
@@ -213,6 +279,15 @@ export const getMultiProviderEpisodeSource = async (req: Request, res: Response)
     }
 
     let sources = null;
+
+    if (episodeId.includes('gogoanime.com.by') || episodeId.includes('streaming.php')) {
+      console.log(`Episode is from Gogoanime/Anipub - using direct embed URL`);
+      return res.json({
+        provider: "anipub",
+        sources: [{ url: episodeId, quality: "auto", isM3U8: false }],
+        subtitles: []
+      });
+    }
 
     for (let i = 0; i < 3; i++) {
       try {

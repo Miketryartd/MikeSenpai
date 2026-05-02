@@ -59,7 +59,7 @@ router.get('/api/test', (req, res) => {
   res.json({ message: "API is working", timestamp: new Date().toISOString() });
 });
 
-// Also add a test for the map route specifically
+
 router.get('/api/map/test-route', (req, res) => {
   res.json({ message: "Map route prefix is working" });
 })
@@ -67,7 +67,7 @@ router.get('/api/map/test-route', (req, res) => {
 //anipub test
 router.get('/api/test-anipub', async (req, res) => {
   try {
-    const response = await fetch('https://anipub.xyz/api/topRated/1', {
+    const response = await fetch('https://anipub.xyz/api/info/black-clover', {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'application/json',
@@ -77,6 +77,22 @@ router.get('/api/test-anipub', async (req, res) => {
       status: response.status, 
       ok: response.ok,
       message: response.status === 403 ? 'Anipub is blocking your IP' : 'Working'
+    });
+  } catch (err: any) {
+    res.json({ error: err.message });
+  }
+});
+router.get('/api/test-anipub-stream/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await fetch(`https://anipub.xyz/v1/api/details/${id}`);
+    const data = await response.json();
+    res.json({ 
+      status: response.status, 
+      ok: response.ok,
+      hasLink: !!data?.local?.link,
+      episodeCount: data?.local?.ep?.length || 0,
+      sample: data?.local?.link?.substring(0, 100)
     });
   } catch (err: any) {
     res.json({ error: err.message });
