@@ -1,4 +1,5 @@
-// backend/Controllers/SearchAnimeController.ts
+
+
 import { Request, Response } from "express";
 import SearchVal from "../ZodMod/SearchInputVal.js";
 import { ANIME } from "@consumet/extensions";
@@ -41,6 +42,18 @@ const getTitle = (title: any): string => {
   if (title?.romaji) return title.romaji;
   if (title?.native) return title.native;
   return "Unknown";
+};
+
+
+const buildAnimeUnitySlug = (numericId: string | number, title: string): string => {
+  const normalizedTitle = String(title)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '') 
+    .replace(/\s+/g, '-') 
+    .replace(/-+/g, '-') 
+    .replace(/^-+|-+$/g, ''); 
+  
+  return `${numericId}-${normalizedTitle}`;
 };
 
 const searchWithProxy = async (query: string) => {
@@ -95,7 +108,7 @@ export const SearchAnime = async (req: Request, res: Response) => {
     let { query } = parsed.data;
     query = query.trim().toLowerCase();
     
-    console.log("SEARCH QUERY:", query);
+    console.log(" SEARCH QUERY:", query);
 
     let data: any = null;
     let source = "animeunity";
@@ -103,7 +116,7 @@ export const SearchAnime = async (req: Request, res: Response) => {
     if (query.length <= 2) {
       const suggestions = commonAnimeMap[query];
       if (suggestions && suggestions.length > 0) {
-        console.log(`Short query "${query}" - fetching suggestions`);
+        console.log(` Short query "${query}" - fetching suggestions`);
         
         const suggestionResults = [];
         for (const suggestion of suggestions.slice(0, 6)) {
@@ -111,8 +124,10 @@ export const SearchAnime = async (req: Request, res: Response) => {
             const result = await fetchWithRetry(suggestion);
             if (result && result.results && result.results.length > 0) {
               for (const anime of result.results.slice(0, 3)) {
+             
+                const slug = buildAnimeUnitySlug(anime.id, getTitle(anime.title));
                 suggestionResults.push({
-                  Id: anime.id,
+                  Id: slug,  
                   Name: getTitle(anime.title),
                   Image: anime.image || "",
                   finder: getTitle(anime.title).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
@@ -121,7 +136,7 @@ export const SearchAnime = async (req: Request, res: Response) => {
               }
             }
           } catch (err) {
-            console.log(`Error fetching suggestion for ${suggestion}:`, err);
+            console.log(` Error fetching suggestion for ${suggestion}:`, err);
           }
         }
         
@@ -145,32 +160,36 @@ export const SearchAnime = async (req: Request, res: Response) => {
       }
     }
 
-    console.log("Trying AnimeUnity for:", query);
+    console.log(" Trying AnimeUnity for:", query);
     
     try {
       const unityResults = await fetchWithRetry(query);
       if (unityResults && unityResults.results && unityResults.results.length > 0) {
         data = {
-          results: unityResults.results.map((anime: any) => ({
-            Id: anime.id,
-            Name: getTitle(anime.title),
-            Image: anime.image || "",
-            finder: getTitle(anime.title).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-            rating: anime.rating,
-            type: anime.type,
-            source: "animeunity"
-          })),
+          results: unityResults.results.map((anime: any) => {
+          
+            const slug = buildAnimeUnitySlug(anime.id, getTitle(anime.title));
+            return {
+              Id: slug,  
+              Name: getTitle(anime.title),
+              Image: anime.image || "",
+              finder: getTitle(anime.title).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+              rating: anime.rating,
+              type: anime.type,
+              source: "animeunity"
+            };
+          }),
           found: true,
           source: "animeunity"
         };
-        console.log("AnimeUnity returned:", data.results.length, "results");
+        console.log(` AnimeUnity returned: ${data.results.length} results`);
       }
     } catch (err) {
-      console.log("AnimeUnity search failed:", err);
+      console.log(" AnimeUnity search failed:", err);
     }
 
     if (!data || !data.results || data.results.length === 0) {
-      console.log("Falling back to Anipub for:", query);
+      console.log(" Falling back to Anipub for:", query);
       source = "anipub";
       
       try {
@@ -191,16 +210,16 @@ export const SearchAnime = async (req: Request, res: Response) => {
               found: true,
               source: "anipub"
             };
-            console.log("Anipub returned:", data.results.length, "results");
+            console.log(` Anipub returned: ${data.results.length} results`);
           }
         }
       } catch (err) {
-        console.log("Anipub search failed:", err);
+        console.log(" Anipub search failed:", err);
       }
     }
 
     if (!data || !data.results || data.results.length === 0) {
-      console.log("No results found for:", query);
+      console.log(" No results found for:", query);
       return res.status(200).json({
         results: [],
         found: false,
@@ -215,11 +234,11 @@ export const SearchAnime = async (req: Request, res: Response) => {
       searchQuery: query
     };
     
-    console.log(`Final: ${data.results.length} results from ${source}`);
+    console.log(`Final: ${data.results.length} results from ${source}\n`);
     return res.status(200).json(responseData);
 
   } catch (error) {
-    console.error("Error getting search anime", error);
+    console.error(" Error getting search anime", error);
     return res.status(500).json({
       error: error instanceof Error ? error.message : "Server error",
     });

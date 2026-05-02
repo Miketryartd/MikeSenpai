@@ -40,7 +40,7 @@ export const findByGenre = async (req: Request, res: Response) => {
     const now = Date.now();
 
     if (cached && now - cached.timestamp < CACHE_TTL) {
-      console.log(`Cache hit: ${cacheKey}`);
+    
       return res.status(200).json(cached.data);
     }
 

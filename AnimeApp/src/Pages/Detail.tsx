@@ -80,60 +80,59 @@ function Detail() {
   const { loading, result, error } = useAnimeDetails(resolvedId || id);
   const [currentVideo, setCurrentVideo] = useState<string | null>(null);
 
-useEffect(() => {
-  const resolveAnimeId = async () => {
-    const idToResolve = id || finder;
-    
-    if (!idToResolve) {
-      setMappingComplete(true);
-      return;
-    }
-    
-    const isNumericId = /^\d+$/.test(String(idToResolve));
-    const isAnimeUnityFormat = /^\d+-[a-z-]+$/.test(String(idToResolve));
-    const isPlainText = /^[a-z][a-z0-9-]+$/.test(String(idToResolve)) && !isNumericId && !isAnimeUnityFormat;
-    
-    if (isNumericId || isAnimeUnityFormat) {
-      console.log(`ID is already in AnimeUnity format: ${idToResolve}`);
-      setResolvedId(idToResolve);
-      setMappingComplete(true);
-      return;
-    }
-    
-    if (isPlainText) {
+  useEffect(() => {
+    const resolveAnimeId = async () => {
+      const idToResolve = id || finder;
+      
+      if (!idToResolve) {
+        console.log("No ID or finder provided");
+        setMappingComplete(true);
+        return;
+      }
+
+      console.log(`Resolving ID: "${idToResolve}"`);
+      
+      const isNumericId = /^\d+$/.test(String(idToResolve));
+      const isAnimeUnityFormat = /^\d+-[a-z-]+$/.test(String(idToResolve));
+      
+      if (isNumericId || isAnimeUnityFormat) {
+        console.log(`Already in correct format: "${idToResolve}"`);
+        setResolvedId(idToResolve);
+        setMappingComplete(true);
+        return;
+      }
+      
+      console.log(`AnimeKai format detected, attempting to map: "${idToResolve}"`);
       setMappingLoading(true);
+      
       try {
-        console.log(`Attempting to map AnimeKai ID: ${idToResolve}`);
         const response = await fetch(`${DynamicUrl()}/mikesenpai/api/map/animekai/${encodeURIComponent(idToResolve)}`);
         
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.animeUnityId) {
+            console.log(`Mapped successfully: "${idToResolve}" -> "${data.animeUnityId}"`);
             setResolvedId(data.animeUnityId);
-            console.log(`Mapped to: ${data.animeUnityId}`);
           } else {
-            console.log(`Mapping failed, using original ID: ${idToResolve}`);
+            console.log(`Mapping failed, using original ID: "${idToResolve}"`);
             setResolvedId(idToResolve);
           }
         } else {
-          console.log(`Mapping endpoint returned ${response.status}, using original ID`);
+          console.log(`Mapping API returned ${response.status}, using original ID`);
           setResolvedId(idToResolve);
         }
       } catch (err) {
-        console.error("Mapping failed:", err);
+        console.error(`Mapping error:`, err);
         setResolvedId(idToResolve);
       } finally {
         setMappingLoading(false);
         setMappingComplete(true);
       }
-    } else {
-      setResolvedId(idToResolve);
-      setMappingComplete(true);
-    }
-  };
+    };
 
-  resolveAnimeId();
-}, [id, finder]);
+    resolveAnimeId();
+  }, [id, finder]);
+
   const handleGoBackRefresh = () => {
     navigate('/Main');
     setTimeout(() => window.location.reload(), 100);
@@ -156,7 +155,6 @@ useEffect(() => {
   if (!result || !mappingComplete) return <DetailSkeleton />;
 
   const anime = result.local;
- 
 
   const infoItems = [
     { label: "Score", value: anime?.MALScore, condition: anime?.MALScore && anime.MALScore !== "N/A" },
@@ -191,18 +189,17 @@ useEffect(() => {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs bg-purple-600/40 px-2 py-1 rounded">ANIME</span>
-               
               </div>
               <h1 className="text-3xl md:text-5xl font-bold mb-3">{anime?.title || anime?.Name || 'Unknown Title'}</h1>
-             {anime?.Genres && anime.Genres.length > 0 && (
-  <div className="flex flex-wrap gap-2 mb-4">
-    {anime.Genres.slice(0, 4).map((genre: string, i: number) => (
-      <span key={i} className="text-xs bg-black/20 backdrop-blur-md   px-3 py-1 rounded-full">
-        {genre}
-      </span>
-    ))}
-  </div>
-)}
+              {anime?.Genres && anime.Genres.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {anime.Genres.slice(0, 4).map((genre: string, i: number) => (
+                    <span key={i} className="text-xs bg-black/20 backdrop-blur-md px-3 py-1 rounded-full">
+                      {genre}
+                    </span>
+                  ))}
+                </div>
+              )}
               <a
                 href="#watch-section"
                 className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105"

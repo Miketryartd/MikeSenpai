@@ -16,7 +16,7 @@ export const TopRatedAnime = async (req: Request, res: Response) => {
     const key = `topRated-${page}`;
     const cached = cache.get(key);
     if (cached) {
-      console.log("Cache hit:", key);
+    
       return res.status(200).json(cached);
     }
 

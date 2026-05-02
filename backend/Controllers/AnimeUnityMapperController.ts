@@ -28,9 +28,14 @@ const normalizeTitle = (title: string): string => {
 };
 
 const extractAnimeNameFromKaiId = (kaiId: string): string => {
-  let cleaned = kaiId.replace(/-(\d+)(p|s)?$/i, '');
+
+  let cleaned = kaiId.replace(/-\w{4,6}$/, '');
+  
+
+  cleaned = cleaned.replace(/-\d+$/, '');
+  
   cleaned = cleaned.replace(/-/g, ' ');
-  cleaned = cleaned.replace(/\d+$/, '');
+  
   return cleaned.trim();
 };
 
@@ -50,63 +55,35 @@ export const mapAnimeKaiToAnimeUnity = async (req: Request, res: Response) => {
       return res.status(200).json(cached);
     }
 
+   
     const searchResults = await animeunity.search(animeName);
     
     if (!searchResults.results || searchResults.results.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        error: `No results found for "${animeName}"`,
-        originalTitle: decodedQuery
+        error: `No results found for "${animeName}"`
       });
     }
 
-    const normalizedSearchTitle = normalizeTitle(animeName);
-    let bestMatch = null;
-    let bestScore = 0;
-
+    let bestMatch = searchResults.results[0];
+    const normalizedSearch = normalizeTitle(animeName);
+    
     for (const result of searchResults.results) {
       const resultTitle = getTitle(result.title);
-      const normalizedResultTitle = normalizeTitle(resultTitle);
+      const normalizedResult = normalizeTitle(resultTitle);
       
-      let score = 0;
-      if (normalizedResultTitle === normalizedSearchTitle) {
-        score = 100;
-      } else if (normalizedResultTitle.includes(normalizedSearchTitle) || 
-                 normalizedSearchTitle.includes(normalizedResultTitle)) {
-        score = 75;
-      }
-      
-      const titleWords = normalizedSearchTitle.split(' ');
-      for (const word of titleWords) {
-        if (word.length > 2 && normalizedResultTitle.includes(word)) {
-          score += 10;
-        }
-      }
-      
-      if (score > bestScore) {
-        bestScore = score;
+      if (normalizedResult === normalizedSearch) {
         bestMatch = result;
+        break;
       }
-    }
-
-    if (!bestMatch) {
-      bestMatch = searchResults.results[0];
     }
 
     const result = {
       success: true,
       originalTitle: decodedQuery,
       extractedName: animeName,
-      animeUnityId: bestMatch.id,
+      animeUnityId: bestMatch.id,  // This should return "7460-mistress-kanan-is-devilishly-easy-kanansama-wa-akumade-choroi"
       animeUnityTitle: getTitle(bestMatch.title),
-      matchConfidence: bestScore,
-      animeUnityData: {
-        id: bestMatch.id,
-        title: getTitle(bestMatch.title),
-        image: bestMatch.image,
-        type: bestMatch.type,
-        rating: bestMatch.rating
-      }
     };
 
     cache.set(cacheKey, result);

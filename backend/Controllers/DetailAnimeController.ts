@@ -117,7 +117,7 @@ const mapAnimeUnityToUI = (info: any) => {
 };
 
 
-// backend/Controllers/DetailAnimeController.ts
+
 export const getDetails = async (req: Request, res: Response) => {
   try {
     let { id } = req.params;
@@ -138,10 +138,11 @@ export const getDetails = async (req: Request, res: Response) => {
     const isAnimeKaiFormat = /^[a-z][a-z0-9-]+-\d+[a-z]*$/.test(id);
     const isAnipubSlug = /^[a-z][a-z0-9-]+$/.test(id) && !isAnimeKaiFormat;
 
+   
     if (isAnimeUnityFormat) {
-      let unityId = id.split('-')[0];
-      console.log(`Fetching AnimeUnity for ID: ${unityId}`);
-      const info = await fetchAnimeInfoWithFallback(unityId, true);
+     
+      console.log(`Fetching AnimeUnity for FULL ID: ${id}`);
+      const info = await fetchAnimeInfoWithFallback(id, true);
       if (info && info.id) {
         data = { local: mapAnimeUnityToUI(info), source: "animeunity" };
       }
@@ -154,7 +155,7 @@ export const getDetails = async (req: Request, res: Response) => {
     } else if (isNumeric || isAnipubSlug) {
       console.log(`Fetching Anipub for ID/slug: ${id}`);
       try {
-       const response = await fetchWithRetry(`https://anipub.xyz/api/info/${id}`);
+        const response = await fetchWithRetry(`https://anipub.xyz/api/info/${id}`);
         if (response.ok) {
           const info = await response.json();
           const fixImage = (path: string) => path?.startsWith('https://') ? path : `https://anipub.xyz/${path}`;

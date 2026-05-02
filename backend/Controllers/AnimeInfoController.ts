@@ -30,7 +30,7 @@ export const getAnimeInfo = async (req: Request, res: Response) => {
     const key = `animeInfo-${id}`;
     const cached = cache.get(key);
     if (cached) {
-      console.log("Cache hit:", key);
+     
       return res.status(200).json(cached);
     }
 
