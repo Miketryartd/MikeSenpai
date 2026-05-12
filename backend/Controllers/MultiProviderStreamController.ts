@@ -97,7 +97,7 @@ export const getMultiProviderStream = async (req: Request, res: Response) => {
     const idParam = req.params.id;
     let animeId = getStringParam(idParam);
 
-    console.log(`\n📺 MultiProviderStream called with: ${animeId}`);
+    console.log(`\n MultiProviderStream called with: ${animeId}`);
 
     if (!animeId) {
       return res.status(400).json({ error: "Missing id" });
